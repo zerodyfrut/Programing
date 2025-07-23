@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>main</title>
+</head>
+
+<body>
+    <h3>main Page</h3>
+    <!-- SearchTypeList, popularQueryList -->
+    <div> 인기 키워드 : <br>
+        <!-- <span th:each="query : ${popularQueryList}" th:text="${query}"> -->
+        <span th:each="query : ${popularQueryList}">
+            [[${query}]]
+
+        </span>
+    </div>
+
+    <form action="/search/result">
+        <select name="type">
+            <option th:each="item:${searchTypeList}" th:text="${item.text}" th:value="${item.code}" />
+        </select>
+        <input name="query">
+        <input type="submit" value="검색">
+    </form>
+</body>
+
+</html>

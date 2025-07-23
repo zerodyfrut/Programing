@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>orderForm</title>
+</head>
+<body>
+    <p>주문서</p>
+    <form method="post">
+        [상품 1]
+        ID : <input name="orderItems[0].itemId" />
+        수량 : <input name="orderItems[0].number" />
+        주의 : <input name="orderItems[0].remark" /><br>
+        [상품 2]
+        ID : <input name="orderItems[1].itemId" />
+        수량 : <input name="orderItems[1].number" />
+        주의 : <input name="orderItems[1].remark" /><br>
+        [상품 3]
+        ID : <input name="orderItems[2].itemId" />
+        수량 : <input name="orderItems[2].number" />
+        주의 : <input name="orderItems[2].remark" /><br><br>
+        
+        [배송지]
+        우편변호 : <input name="address.zipcode"/><br>
+        주소 1 : <input name="address.address1"/><br>
+        주소 2 : <input name="address.address2"/><br>
+        <input type="submit">
+    </form>
+</body>
+</html>

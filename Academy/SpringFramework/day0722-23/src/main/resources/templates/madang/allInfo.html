@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도서 및 고객 목록</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f9;
+            padding: 40px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            background-color: #ffffff;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📚 전체 도서 목록</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>도서 ID</th>
+                <th>도서명</th>
+                <th>출판사</th>
+                <th>가격</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="book : ${books}">
+                <td th:text="${book.bookid}"></td>
+                <td th:text="${book.bookname}"></td>
+                <td th:text="${book.publisher}"></td>
+                <td th:text="${book.price} + '원'"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>👥 전체 고객 목록</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>고객 ID</th>
+                <th>이름</th>
+                <th>주소</th>
+                <th>전화번호</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="customer : ${customers}">
+                <td th:text="${customer.custid}"></td>
+                <td>
+                    <a th:href="@{/madang/{custid}(custid=${customer.custid})}"
+                       th:text="${customer.name}">고객 이름</a>
+                </td>
+                <td th:text="${customer.address}"></td>
+                <td th:text="${customer.phone}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+
+</html>

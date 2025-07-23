@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}"><!-- 상속을 받는다 -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeptList</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- content라는 이름을 부여, 오버라이딩 개념 -->
+        <table>
+            <tr th:each="dept : ${dlist}">
+                <td th:text="${dept.deptno}"></td>
+                <td> <a th:href="@{/update/{no}(no=${dept.deptno})}">[[${dept.dname}]]</td>
+                <!-- @{}로 이동할 링크 지정 템플릿변수로 값이 변하는 것을  -->
+                <td th:text="${dept.loc}"></td>
+                <td><button th:data-target="${dept.deptno}">삭제</button></td>
+            </tr>
+        </table>
+        <a href="/">홈</a>
+        <script>
+            const dbtns = document.querySelectorAll("button");
+            dbtns.forEach(dbtn => dbtn.addEventListener("click", (event) => {
+                let no = event.target.getAttribute("data-target");
+
+                location.href = "/delete/" + no; //get 방식
+            }));
+
+        </script>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+
+        <p>사원 정보 검색</p>
+        <div>
+            <form action="/name/result1">
+                <input name="name"><input type="submit" value="검색">
+            </form>
+        </div>
+        <br>
+        [[${name}]] 검색 결과 :
+        <div>
+            <ul th:each="emp :${elist}">
+                <li>사원번호 : [[${emp.empno}]]</li>
+                <li>부서명 : [[${emp.dept.dname}]]</li>
+                <li>사원명 : [[${emp.ename}]]</li>
+                <li>직급 : [[${emp.job}]]</li>
+                <li>입사일 : [[${#dates.format(emp.hiredate)}]]</li>
+                <hr>
+            </ul>
+            <p th:text="'검색조건에 맞는 사원이 없음'" th:if="${size eq 0}" </p>
+                <!-- th 사용시 문자열을 출력할 때 ""안이여도 ''로 문자열임을 명시시켜줘야함 -->
+        </div>
+    </div>
+</body>
+
+</html>

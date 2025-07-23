@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+
+        <p>부서를 추가합니다.</p>
+        <form method="post">
+            <!-- 주소는 같고 요청방식이 다르기 때문에 action 생략가능 -->
+            <span>부서</span><input name="dname"><br>
+            <span>근무지</span><input name="loc">
+            <input type="submit" value="부서 추가">
+        </form>
+    </div>
+</body>
+
+</html>

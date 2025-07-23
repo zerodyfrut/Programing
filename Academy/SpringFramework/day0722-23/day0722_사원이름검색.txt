@@ -1,0 +1,322 @@
+**DTO작업 **
+
+[Dept.java]
+package com.example.dto;
+
+import lombok.Data;
+
+@Data
+public class Dept {
+	private int deptno;//컬럼명 == 변수명
+	private String dname;
+	private String loc; 
+}
+
+[Emp.java]
+package com.example.dto;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class Emp { //(자식 : n)
+	private int empno;
+	private String ename;
+	private String job;
+	private int mgr;
+	private Date hiredate;
+	private double sal;
+	private double comm;
+	private int deptno;
+	
+	private Dept dept;//(부모 : 1)
+}
+
+
+
+
+**DAO**
+
+[EmpDao.java]
+
+package com.example.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import com.example.dto.Emp;
+
+@Mapper
+public interface EmpDao {
+    @Select({"select empno, dname as 'dept.dname', ename, job, hiredate from"
+    ,"emp inner join dept on emp.deptno = dept.deptno"
+    ,"where ename like concaT('%', #{parameter}, '%')"})
+    List<Emp> searchName(String name);
+}
+
+
+
+
+**컨트롤러**
+
+[EmpController.java]
+
+package com.example.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import com.example.dao.EmpDao;
+import com.example.dto.Emp;
+
+
+@Controller
+public class EmpController {
+
+    @Autowired
+    EmpDao dao;
+
+    @GetMapping("/name/search")
+    public String form() {
+        return "emp/search";
+    }
+    
+    @GetMapping("/name/result1")
+    public String result(@ModelAttribute("name") String name, Model m ) {
+        
+        List<Emp> elist = dao.searchName(name);
+        m.addAttribute("elist", elist);
+        m.addAttribute("size", elist.size());
+        return "emp/result";
+    }
+    
+
+}
+
+
+
+
+**뷰**
+
+[search.html]
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사원 검색</title>
+</head>
+<body>
+    <h4>사원의 이름으로 검색합니다.</h4>
+    <form action="/name/result1">
+        <input type="search" name="name">
+        <input type="submit" value="검색">
+    </form>
+</body>
+</html>
+
+
+[result.html]
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사원 검색 결과</title>
+</head>
+<body>
+    <div>
+     <h4>사원의 이름으로 검색합니다.</h4>
+    <form action="/name/result1">
+        <input type="search" name="name">
+        <input type="submit" value="검색">
+    </form>
+    </div>
+    <div>
+        <p>[[${name}]]의 검색결과입니다.</p>
+        <ul th:each="emp:${elist}">
+            <li>사원번호: [[${emp.empno}]]</li>
+            <li>부서명: [[${emp.dept.dname}]]</li>
+            <li>사원명: [[${emp.ename}]]</li>
+            <li>직급: [[${emp.job}]]</li>
+            <li>입사일: [[${#dates.format(emp.hiredate)}]]</li>
+            <hr>
+        </ul>
+
+        <span th:text="'검색 조건에 맞는 사원이 없습니다'" th:if="${size eq 0}"></span>
+    </div>
+</body>
+</html>
+
+-------------------------------------------------------------------------------------------------------------
+부서별 사원 검색
+
+
+
+**DAO**
+
+[EmpDao.java]추가
+
+    @Select("select deptno, dname from dept")
+    List<Dept> depts(); 
+    
+    @Select("select empno, ename from emp where deptno =#{deptno}")
+    List<Map<String,Object>> emps(int deptno);
+    
+    @Select("select * from emp where empno = #{empno}")
+    Emp empOne(int empno);
+
+
+
+
+**컨트롤러**
+
+[EmpController.java]추가
+
+    @GetMapping("/select/dept")
+    public String depts(Model m) {
+        List<Dept> dlist = dao.depts();
+        m.addAttribute("dlist", dlist);
+        return "emp/search2";
+    }
+
+    @GetMapping("/select/emps/{deptno}")
+    @ResponseBody
+    public String emps(@PathVariable("deptno") int deptno) {
+        List<Map<String, Object>> elist = dao.emps(deptno);
+        Gson gson = new Gson();
+
+        return gson.toJson(elist);
+    }
+
+    @GetMapping("/select/emp/{empno}")
+    @ResponseBody
+    public String empOne(@PathVariable("empno") int empno) {
+        Emp emp = dao.empOne(empno);
+        Gson gson = new Gson();
+
+        return gson.toJson(emp);
+    }
+
+
+
+
+**뷰**
+
+[emp/search2.html]
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        span {
+            float: left;
+        }
+
+        #empinfo {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <span id="dept">
+        <select>
+            <option>선택하세요</option>
+            <option th:each="dept:${dlist}" th:text="${dept.dname}" th:value=${dept.deptno}></option>
+        </select>
+    </span>
+    <span id="emp"></span>
+    <span id="empinfo"></span>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const select1 = document.querySelector("#dept select");
+        select1.addEventListener("change", async () => {
+            try {
+                document.querySelector("#emp").innerHTML = "";
+                document.querySelector("#empinfo").innerHTML = "";
+
+                let deptno = select1.value;
+
+                const response = await axios.get("/select/emps/" + deptno);
+                let employees = response.data; 
+                //data까지 써야 값까지 꺼냄, JSON->JS Object 
+
+                let select = document.createElement('select');
+                const firstoption = document.createElement('option');
+                firstoption.textContent = "선택해주세요";
+                select.appendChild(firstoption);
+
+                // option 요소 추가
+                employees.forEach(emp => {
+                    const option = document.createElement('option');
+                    option.value = emp.empno;
+                    option.textContent = emp.ename;
+                    select.appendChild(option);
+                });
+
+                // #emp 요소(div 등)에 <select> 삽입
+                let container = document.getElementById('emp');
+                container.appendChild(select);
+
+            } catch (error) {
+                console.error(error);
+            }
+
+        })
+
+        const select2 = document.querySelector("#emp");
+        select2.addEventListener("change", async () => {
+            try {
+                document.querySelector("#empinfo").innerHTML = "";
+
+                let empno = document.querySelector("#emp select").value;
+                const response = await axios.get("/select/emp/" + empno);
+                let employee = response.data;
+
+                const container2 = document.getElementById('empinfo');
+
+                for (key in employee) {
+                    const div = document.createElement('div');
+                    if (key === 'hiredate') {
+                        const date = new Date(employee[key]);
+                        const yyyy = date.getFullYear();
+                        const mm = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작
+                        const dd = String(date.getDate()).padStart(2, '0');
+                        const formatted = `${yyyy}-${mm}-${dd}`;
+                        div.textContent = `${key}: ${formatted}`;
+                    } else {
+                        div.textContent = `${key}: ${employee[key]}`;
+                    }
+                    container2.appendChild(div);
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+
+        })
+
+    </script>
+
+</body>
+
+</html>
+
+
+

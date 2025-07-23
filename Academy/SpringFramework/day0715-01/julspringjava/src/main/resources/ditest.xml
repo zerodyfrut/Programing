@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:p="http://www.springframework.org/schema/p"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+   
+  <bean id="bar" class="spring.di.Bar" />
+  <bean id="baz" class="spring.di.Baz" init-method="start" destroy-method="stop" /> 
+ 
+ 
+  <!-- <bean id="foo" class="spring.di.Foo" >
+    <constructor-arg><ref bean="bar"/>
+    </constructor-arg>
+    <constructor-arg ref="baz"/>
+  </bean> -->
+
+<!--constructor-arg는 생성자가 기본생성자가 아닐경우 작성
+ref 태그를 통해 bean을 설정, 또는 ref를 속성으로 사용-->
+
+  <!-- <bean id="foo" class="spring.di.Foo">
+    <constructor-arg><ref bean="bar"/>
+    </constructor-arg>
+    <constructor-arg ref="baz"/>
+    <constructor-arg>
+      <value>1</value>
+    </constructor-arg>
+    <constructor-arg value="hello"/>
+    </bean> -->
+
+  <!-- <bean id="foo" class="spring.di.Foo">
+    <property name="bar" ref="bar"/>
+    <property name="baz" ref="baz"/>
+    <property name="i" value="10"/>
+    <property name="str" value="안녕"/>
+  </bean> -->
+
+  <!-- <bean id="foo" class="spring.di.Foo" p:bar-ref="bar"
+  p:i="100" p:str="hello" /> -->
+
+  <bean id="fooLookUp" class="spring.di.FooLookUp">
+    <lookup-method name="getBaz" bean="baz"/>
+  </bean>
+
+  <bean id="foo" class="spring.di.Foo" autowire="byType"
+    p:i="1000" p:str="hello" />
+
+  <!--두번째 bar 타입 객체 -->
+  <bean id="bar1" class="spring.di.Bar" autowire-candidate="false" />
+    
+
+</beans>

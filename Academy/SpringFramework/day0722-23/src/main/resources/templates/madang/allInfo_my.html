@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <table>
+        <tr th:each="book : ${books}">
+            <td th:text="${book.bookid}"></td>
+            <td th:text="${book.bookname}"></td>
+            <td th:text="${book.publisher}"></td>
+            <td th:text="${book.price}"></td>
+        </tr>
+    </table>
+    <br>
+    <table>
+        <tr th:each="customer : ${customers}">
+            <td th:text="${customer.custid}"></td>
+            <td><a th:href="@{/madang/{custid}(custid=${customer.custid})}">[[${customer.name}]]</a></td>
+            <td th:text="${customer.address}"></td>
+            <td th:text="${customer.phone}"></td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

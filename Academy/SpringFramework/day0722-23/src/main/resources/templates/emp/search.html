@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div layout:fragment="sidebar">
+        <ul>
+            <li><a th:href="@{/emp}">사원 목록</a></li>
+            <li><a th:href="@{/dept}">부서</a></li>
+        </ul>
+    </div>
+    <div layout:fragment="content">
+        <p>사원 정보 검색</p>
+        <form action="/name/result1">
+            <input type="search" name="name">
+            <input type="submit" value="검색">
+        </form>
+    </div>
+</body>
+
+</html>

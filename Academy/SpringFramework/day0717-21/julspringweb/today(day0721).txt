@@ -1,0 +1,85 @@
+1. 파라미터 값 저장
+    1) 클래스(자바 빈 객체) : 클래스 만들어 두면 컨트롤에서 매개변수로 사용시
+                            DS에서 자동으로 만들어줌
+                            (@ModelAttribute 사용시 이름지정)
+    2) Param : 얘는 일회용 느낌
+
+
+2. 비지니스 로직 수행
+
+
+3. 모델에 결과 추가
+    1) Model 타입의 매개변수로 구현 객체 받아오기
+        public String 이름(Model m){
+            m.addAttribute("이름", "값");
+            return "view 경로"// 수업에선 언급 없었으나, 아마 추가 필요할 듯
+        }
+    
+    2) Model 구현객체 생성 후 리턴
+        public Model 이름(){
+            Model m = new Model구현클래스().addAttribute("이름","값");
+            return m;
+        }
+
+    3) @ModelAttribute를 사용한 메소드
+            (1). 요청시 메서드의 매개변수 앞 : 
+                 매개변수로 전달된 객체 -> DS 생성
+                 -> 자동으로 view 전달 -> 이름 지정
+
+            (2). 컨트롤러 클래스의 메서드 : 
+                 컨드롤러에 요청이 들어오면 요청처리 메서드보다 먼저 수행 (무슨 놀이공원 vip인가)
+                 리턴 값을 model에 추가 (view 로 전달)
+                 메서드가 다 끝났다면 요청처리 메서드 수행
+
+
+    cf 1. String, 기본형, toString()
+        [[${모델 속성명}]] 을 사용해 접근
+    cf 2. 객체
+        ${객체.변수명} 을 사용해 접근
+        ex) ${Map.key} 해당 키에 매핑된 값
+
+
+4. 뷰 지정
+    1) 리턴타입 : String - 리턴 값이 view name
+    2) 리턴타입 : viod - URL path 부분 사용해 자동 지정
+    3) 리다이렉트 : 비지니스 로직 수행 후 화면 필요 없이 다음작업으로 넘어가는 경우
+                  리턴값에 "redirect:/요청uri" -> view로 안가고 바로 client에 전달
+
+
+-----
+
+
+요청방식
+
+GET : 서버에 있는 리소스를 가져오기
+POST : 서버에 새로운 리소스를 추가
+
+<form method="POST">
+<input type = "hidden" name="_method" value="요청방식">
+form 선언은 POST, name에 '_method' 사용 및 요청방식 (PUT / DELETE / PATCH)
+view가 따로 없음(리다이렉트)
+
+(PUT / DELETE / PATCH) : 모두 근본적으로 POST 방식
+PUT : 리소스 전체 업데이트(수정)
+PATCH : 리소스 일부 업데이트(수정)
+DELETE : 서버에 있는 리소스 삭제
+    
+JulspringwebApplicationTests.java 에 아래 코드 추가
+    @Bean
+    public HiddenHttpMethodFilter hiddenHttpMethodFilter(){
+        return new HiddenHttpMethodFilter();
+    }// _method라는 이름으로 전달된 값을 요청방식으로 인식한다.
+
+
+-----
+템플릿 변수
+
+protocol://host:port/경로1/아이디/페이지번호
+@PathVariable("템플릿 변수명")
+
+@~Mapping("/경로1/{id}/{page}")
+public String method(@PathVariable("id") String id, 
+                     @PathVariable("page") int page){
+    
+}
+

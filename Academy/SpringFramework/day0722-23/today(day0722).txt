@@ -1,0 +1,116 @@
+DB연동
+
+1. 커넥션 연결
+2. Statement sql 전송
+3. execute 실행, 결과물 받아오기
+4. 결과물 select -> Java Object
+         insert / update / delete -> int (변경된 레코드 갯수)
+
+Mybatis 
+@과 xml문서를 통해 JDBC의 코드의 자동화
+결과물 받아올때 타입의 확실한 명시 필요
+
+ORM
+레코드와 객체를 연결
+
+select 결과
+* 컬럼명과 변수명이 일치하면 자동저장
+
+
+구성
+Controller
+view 
+Service : @Service
+DAO : @Mapper(구현 객체 생성) , interface
+      @Mapper는 메인 클래스가 위치한 패키지나 하위 패키지에 있을때만 구현객체를 생성한다.
+DTO : 변수명 == 컬럼명(별칭)
+DB 
+
+
+select 실행 메서드 (인터페이스에 작성되는 추상메서드)
+@select("select SQL문")
+리턴타입 메서드 이름 ();
+
+* 리턴타입 
+- 레코드 여러줄, 컬럼 여러개 : List<DTO> , List<Map<String,Object>>
+- 레코드 여러줄, 컬럼 한개 : List<String / int / java.util.Date>
+- 레코드 한줄, 컬럼 여러개 : DTO , MAP
+- 레코드 한줄, 컬럼 한개 : Sting / int / java.util.Date
+
+* 매개변수
+SQL문에 필요한 값을 지정
+select * from dept where deptno = #{deptno}  // #{}을 통해 값을 지정
+값이 필요한 곳에서는 #{} 표현식으로 값을 넣어준다.
+
+매개변수로 필요한 값을 넘겨준다.
+리턴타입 이름(@Param("deptno") int deptno )
+//- 넘겨주는 값이 하나면 @Param 을 생략할 수 있다.
+//리턴타입 이름(int deptno )
+
+select * from dept where dname = #{dname} and loc =#{loc}
+List<Dept> 이름(@Param("dname") String dname, @Param("loc") String loc )
+
+select count(*) form dept
+int 이름()
+
+
+
+insert / update / delete 실행 메서드 (인터페이스에 작성되는 추상메서드)
+@select("select SQL문")
+int 메서드 이름 ();
+
+리턴 타입 -> int (변경된 레코드 갯수)
+
+
+-----
+DTO DAO Service View 순으로 작업 진행
+1. 부서 정보 출력
+2. 부서 추가
+      get:/insert DeptController form() dept/insert.html
+      post:/insert DeptController insert() redirect:/dept
+
+      1) 새로운 부서번호 만들기
+            select max(deptno)+10 from dept
+      2) insert
+            insert into dept values(#{deptno},#{dname},#{loc})
+
+            DAO -> SQL -method, 총 2개의 메소드 필요
+
+3. 부서명 클릭시 해당 부서 근무지 수정
+      get:/update DeptController updateform() dept/update.html : form에 loc 입력
+      put:/update  update()  redirect:/dept : 부서번호와 근무지를 받아서 근무지 수정
+4. 부서 삭제
+      get:/ delete/{no} DeptController delete() redirect:/dept
+
+cf. 사원검색
+      1) 사원명 입력 -> 검색
+      이름의 일부만 입력해도 해당 사원의 정보 출력
+      사원번호, 부서명, 사원명, 직급, 입사일 출력
+      get:/name/search  EmpController form()  emp/search.html
+      get:/name/result  EmpController result()  emp/result.html
+      2) 부서명 클릭시(select/option)
+      해당 부서의 사원명 출력(select/option)
+      사원 선택시 해당 사원 정보 출력
+      사원번호, 사원명, 직입, 입사일, 급여 출력
+
+
+
+
+------
+링크
+
+<!-- 특정 url로 이동 -->
+<a th:href="@{https://www.google.com}">글 상세보기</a>
+
+<!-- 현재 서버 내에서 이동 -->
+<a th:href="@{/board/list}">게시글 리스트</a>
+
+<!-- 파라미터를 넘길 시 -->
+<a th:href="@{/board/view(id = ${board.id})}">글 상세보기</a>
+
+<!-- 파라미터를 여러 개 넘길 시 -->
+<a th:href="@{/board/view(id = ${board.id}, writer = ${board.writer}})}">글 상세보기</a>
+
+<!-- PathVariable 사용 시 -->
+<a th:href="@{/board/view/{id}(id = ${board.id})}">글 상세보기</a>
+

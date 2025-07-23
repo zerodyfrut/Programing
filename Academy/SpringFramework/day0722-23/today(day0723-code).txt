@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div th:if="${#lists.isEmpty(orders)}">
+        <span>구매한 도서가 없습니다.</span>
+    </div>
+        <div th:unless="${#lists.isEmpty(orders)}">
+            <span th:text="${orders[0].name} + '님의 구매 목록'"></span>
+        </div>
+
+        <table>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.bookname}"></td>
+                <td th:text="${order.saleprice}"></td>
+                <td th:text="${order.orderdate}"></td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td> 총액 : [[${sum.sum}]]</td><br>
+                <td> 총 권수 : [[${sum.count}]]</td>
+            </tr>
+        </table>
+
+        <script>
+
+        </script>
+
+</body>
+
+</html>

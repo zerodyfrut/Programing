@@ -1,0 +1,80 @@
+**템플릿 파일 상속받기**
+(여러 페이지에서 공통된 부분은 상속받아서 쓰자)
+
+Layout Dialect 사용 시 layout:decorate로 레이아웃을 지정하고 layout:fragment로 채움.
+
+
+[build.gradle] dependencies 추가
+dependencies { 
+...
+implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.1'
+...
+}
+
+
+**부모 페이지(공통 부분)**
+[templates/layout.html]
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #nav {
+            list-style-type: none;
+            overflow: hidden;
+        }
+
+        #nav {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <ul id="nav">
+
+        <li><a href="/">index</a></li>
+        <li><a href="/dept">모든 부서 정보 확인</a></li>
+        <li><a href="/insert">부서 추가</a><br></li>
+        <li><a href="/name/search">사원검색(이름)</a></li>
+        <li><a href="/select/dept">사원검색(부서별)</a></li>
+
+    </ul>
+    <hr>
+
+    <th:block layout:fragment="content"></th:block>
+
+    <footer>
+        <p>© 2025 MyCompany</p>
+    </footer>	
+
+</body>
+
+</html>
+
+
+**자식 페이지**
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부서 리스트</title>
+</head>
+<body>
+    <div layout:fragment="content">
+	<!--현재 페이지에서 나올 내용 -->	
+    </div>
+</body>
+</html>	
+
+

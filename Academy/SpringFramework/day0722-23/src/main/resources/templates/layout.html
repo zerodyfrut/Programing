@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #nav {
+            list-style-type: none;
+            overflow: hidden;
+        }
+
+        #nav {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <ul id="nav">
+
+        <li><a href="/">index</a></li>
+        <li><a href="/dept">모든 부서 정보 확인</a></li>
+        <li><a href="/insert">부서 추가</a><br></li>
+        <li><a href="/name/search">사원검색(이름)</a></li>
+        <li><a href="/select/dept">사원검색(부서별)</a></li>
+
+    </ul>
+    <hr>
+
+    <!--레이아웃에서 정의한 슬롯중 필요한 것만 자식템풀랏에서 오버라이딩-->
+    <div layout:fragment="sidebar">기본사이드바</div>
+    <th:block layout:fragment="content"></th:block>
+    <!-- 코드의 이름을 컨텐츠라는 이름을 부여, 해당 자리에 삽입 -->
+    <footer>
+        <p>© 2025 MyCompany</p>
+    </footer>
+
+</body>
+
+</html>

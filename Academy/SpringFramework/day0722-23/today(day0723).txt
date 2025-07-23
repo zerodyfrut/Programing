@@ -1,0 +1,108 @@
+
+<<면접자의 정리>>
+
+1. DispatcherServlet (프론트 컨트롤러) 
+   모든 요청을 받아서 적절한 컨트롤러로 전달 
+   web.xml 또는 Spring Boot 에서 설정됨 
+2. HandlerMapping (요청 매핑) 
+   어떤 컨트롤러의 어떤 메서드가 해당 요청을 처리할지 결정 
+   @RequestMapping, @GetMapping, @PostMapping 등이 관련됨 
+3. Controller (컨트롤러) 
+   클라이언트 요청을 처리하고, 비즈니스 로직(Service 호출) 수행 
+   @Controller, @RestController 로 선언 
+4. Model & View (데이터 및 뷰 관리) 
+   Model 객체를 통해 데이터를 뷰로 전달 
+   ViewName 을 반환하여 적절한 화면을 렌더링 
+5. ViewResolver (뷰 결정) 
+   컨트롤러에서 반환한 ViewName에 맞는 View(JSP, Thymeleaf 등)를 찾음 
+6. Response (최종 응답) 
+   HTML 뷰 또는 JSON, XML 데이터를 클라이언트에게 반환
+
+
+Service (비즈니스 로직) 
+   @Service 클래스로 선언되며, 비즈니스 로직을 처리 
+Repository (DAO, 데이터 접근 계층) -JPA사용시
+   데이터베이스와 직접 상호작용하는 계층 
+   @Repository, JpaRepository, CrudRepository 사용 가능 
+
+
+-AOP : 핵심 로직과 공통 기능을 분리하여 코드 중복을 줄이고 유지보수성을 높이는 기술. 
+Spring에서 AOP는 트랜잭션 관리, 로깅, 보안, 성능 모니터링 등에 자주 사용
+
+
+-Spring Boot를 사용하는 이유 
+1) 설정이 간단함 -> application.properties만으로 주요 설정 가능 
+2) 내장 서버 제공 
+3) 의존성 관리 편리 
+4) 마이크로서비스 개발에 적합 
+
+
+주요 어노테이션 
+1) @RestController -@Controller + @ResponseBody를 포함하는 어노테이션 
+   -API 요청에 대한 JSON/XML 응답을 자동으로 반환 
+2) @GetMapping => 서버에서 어떤 데이터를 가져와 보여줄 때(쿼리 스트링을 포함한 URL) 
+   -GET 요청을 처리하는 메서드에 사용 
+3) @PostMapping => 서버 상의 데이터 값이나 상태를 바꾸기 위해 
+   -Post 요청을 처리하는 메서드에 사용 
+4) @Bean -스프링 컨테이너에서 관리하는 객체를 수동으로 등록할 때 사용 
+5) @Autowired => 필요한 의존 객체의 타입에 해당하는 빈을 찾아 주입 
+   -의존성 주입을 수행하는 어노테이션  
+6) @RequestMapping -HTTP 요청을 처리하는 메서드에 사용 
+
+
+-의존성 주입(DI) : 객체 지향 프로그래밍에서 객체 간의 관계를 설정하는 방식 중 하나로, 
+객체가 자기 자신이 아닌 외부에서 필요한 의존 객체를 주입받는 방식 
+사용 이유 -> 결합도 감소(외부에서 의존성을 부여받기 때문에), 
+유지보수 용이(해당 의존성만 변경하면 되기 때문에), 테스트 용이(모의 객체로 교체할 수 있어서), 
+유연성 향상(동일한 인터페이스를 통해 다양한 구현체를 주입받을 수 있어서) 
+
+
+-AJAX : 웹 페이지가 서버와 비동기적으로 데이터를 교환할 수 있게 해주는 기술. 
+이를 통해 전체 페이지를 새로고침하지 않고도 웹 페이지의 일부만 업데이트할 수 있어 
+사용자 경험을 향상 - 동기 방식 : 요청을 처리하는 동안 다른 작업을 수행할 수 없는 방식 
+
+
+- 비동기 방식 : 요청을 보내고, 결과를 기다리지 않고 다른 작업을 진행하는 방식 
+
+
+-ORM : 객체와 관계형 데이터베이스 간의 매핑을 자동화하는 기술. SQL을 직접 작성하지 않고 
+객체 지향적으로 데이터베이스를 조작할 수 있도록 해주는 방식 
+
+
+-Hibernate : 가장 널리 사용되는 ORM 프레임워크 중 하나. Java 기반으로 동작하며, 
+객체와 데이터베이스 간의 매핑을 자동화. JAP의 구현체 중 하나 
+-JPA : Java에서 ORM을 표준화한 API. Hibernate는 JAP의 구현체로 동작 
+-MyBatis : SQL Mapper 프레임워크. SQL을 직접 작성하면서도, Java 객체와 자동 매핑 가능
+
+
+
+
+------
+
+1. 모든 책 정보, 고객 정보 출력
+   처음에는 아래와 같이 list로 했다가 table로 교체함(list는 너무 스크롤이 길어..)
+
+    <!-- <ul th:each="book :${books}">
+        <li>ID : [[${book.bookid}]]</li>
+        <li>Name : [[${book.bookname}]]</li>
+        <li>Publisher : [[${book.publisher}]]</li>
+        <li>Price : [[${book.price}]]</li>
+        <hr>
+    </ul>
+
+    <ul th:each="customer :${customers}">
+        <li>ID : [[${customer.custid}]]</li>
+        <li>Name : [[${customer.name}]]</li>
+        <li>Address : [[${customer.address}]]</li>
+        <li>Phone : [[${customer.phone}]]</li>
+        <hr>
+    </ul> -->
+
+2. 고객 정보 클릭시 해당 고객 주문 내역과 총 구매 금액, 구매횟수 출력
+(책이름, 구매금액, 구매날짜)
+
+   1) 화면 구상
+   2) 요청 uri -> Controller ->View
+   3) Controller Method -> 파라미터 저장, 비지니스 로직
+   4) view에서 모델 데이터 사용해 화면 구현
+

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        sqan {
+            float: left;
+        }
+
+        #empinfo {
+            margin-left: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- <select name="dlist" id="dlist">
+        <option th:each value="dlist.deptno"></option>
+    </select>
+    <select name="elist">
+        <option th:each value="dlist.deptno"></option>
+    </select> -->
+    <span id="dept">
+        <select>
+            <option>선택하세요</option>
+            <option th:each="dept:${dlist}" th:text="${dept.dname}" th:value="${dept.deptno}"></option>
+        </select>
+    </span>
+
+    <span id="emp"></span>
+    <span id="empinfo"></span>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const select1 = document.querySelector("#dept select");
+        select1.addEventListener("change", async () => {
+            try {
+                document.querySelector("#emp").innerHTML = "";
+                document.querySelector("#empinfo").innerHTML = "";
+
+                let deptno = select1.value;
+
+                const response =await axios.get("/select/emp/"+deptno);
+                let employees = response.data;
+                //data까지 작성해야 값을 꺼냄
+
+                let select = document.createElement
+
+            }catch (error) {
+                console.error(error);
+            }
+        })
+    </script>
+
+</body>
+
+</html>
