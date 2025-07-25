@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 업로드</title>
+</head>
+<body>
+    <div th:if="${dto.fileid!=0}">
+        <h3>파일 업로드가 되었습니다.</h3>
+        파일번호 : [[${dto.fileid}]]<br>
+        파일명 : [[${dto.name}]]<br>
+        파일 사이즈 : [[${dto.filesize}]]<br>
+        업로드 파일명 : [[${dto.path}]]<br>
+        <img th:src="${dto.path}" alt="test">
+    </div>
+    <div th:if="${dto.fileid==0}">
+        파일을 선택하지 않았습니다.<br>
+        <span onclick="history.go(-1)" style="text-decoration:underline;">
+        다시 선택</span>하세요
+
+    </div>
+
+</body>
+</html>
