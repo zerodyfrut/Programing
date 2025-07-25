@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>form</title>
+</head>
+
+<body>
+    <div>@RequestParam 사용하기</div>
+    <form action="submit1" method="post" enctype="multipart/form-data">
+        학번 : <input type="text" name="stuno"><br>
+        리포트 : <input type="file" name="report">
+        <input type="submit">
+    </form>
+    <hr>
+    <div>MultipartHttpServletRequest 사용하기</div>
+    <form action="submit2" method="post" enctype="multipart/form-data">
+        학번 : <input type="text" name="stuno"><br>
+        리포트 : <input type="file" name="report">
+        <input type="submit">
+    </form>
+    <hr>
+    <div>커맨드 객체 사용하기</div>
+    <form action="submit3" method="post" enctype="multipart/form-data">
+        학번 : <input type="text" name="stuno"><br>
+        리포트 : <input type="file" name="report">
+        <input type="submit">
+    </form>
+    <hr>
+
+
+</body>
+
+</html>

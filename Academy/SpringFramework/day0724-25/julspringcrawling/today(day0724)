@@ -1,0 +1,27 @@
+J soup
+
+크롤링
+
+엑셀 읽기
+
+[하기 추가해서 새 프로젝트 작성함.
+julspring crawling
+thymeleaf
+spring-web
+devtools
+lombok
+
+gson
+jsoup
+]
+
+RestTemplate
+Spring Framework에서 제공하는 HTTP 통신 클라이언트
+다른 서버에 HTTP 요청(GET/POST 등)을 보내고, 응답을 받아 처리할 때 사용
+
+
+네이버 개발자 센터 ->api
+책 검색 기능 -> 결과물을 엑셀파일로 저장
+
+
+https://openapi.naver.com/v1/search/book_adv.json
