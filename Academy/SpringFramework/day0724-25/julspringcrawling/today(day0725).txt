@@ -1,0 +1,36 @@
+RestTemplate : Server to Server
+
+file Upload / Download
+
+
+일반 파라미터
+이름 : 값 (이름에 매핑된 값 1개)
+
+파일 파라미터
+이름 : 파일이름, 크기, 타입, 내용 등 다양한 정보
+하나의 이름으로 여러정보가 넘어가야함
+<form method="post“ enctype="multipart/form-data">  
+반드시 이렇게 지정해서 보내야함
+
+multipart/form-data 방식으로 전달
+-> 서버는 임시경로에 파일을 업로드 해둠(자동)
+-> 원하는 위치로 이동(파일에 접근이 필요)
+-> 이동한 파일의 위치를 DB에 저장
+
+파일타입의 변수는 MultipartFile 타입 변수 선언
+-> 임시 경로의 파일에 접근
+    1. byte 배열 : 파일 내용을 배열로 구함. 별도의 output 필요
+    2. inputStream : 파일을 읽는 input. 별도의 output 필요
+    3. transferTo 메서드 : 별도의 output 만들필요없음. 중복이름 있으면 덮어쓰기
+
+1. @RequestParam 사용하기
+    html에서 MultipartFile을 사용, 
+    controller에서 @RequestParam 을 사용 MultipartFile에 값을 받음
+
+2. MultipartHttpServletRequest
+    html에서 MultipartFile을 사용, 
+    controller에서 MultipartHttpServletRequest 를 사용
+    getParameter, getFile 메소드를 통해 파라미터 및 파일에 접근
+
+    
+
