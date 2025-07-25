@@ -1,0 +1,320 @@
+[build.gradle] 추가
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+}
+
+[application.properties] 추가
+
+#DataSource Setting
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/madangdb
+spring.datasource.username=madang
+spring.datasource.password=madang
+
+
+
+[DB에 테이블 생성]
+
+create table fileinfo(
+fileid int PRIMARY key auto_increment,
+name varchar(30) not null,
+path varchar(200) not null,
+filesize int not null,
+description varchar(200)
+);
+
+
+[FileInfo.java]
+
+package com.example.julspringcrawling.dto;
+
+import lombok.Data;
+
+@Data
+public class FileInfo {
+	
+	private int fileid;
+	private String name;
+	private String path;
+	private long filesize;
+	private String description;
+}
+
+
+
+
+[FileinfoDao.java]
+
+package com.example.julspringcrawling.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
+
+import com.example.julspringcrawling.dto.FileInfo;
+
+@Mapper
+public interface FileinfoDao {
+    @Insert("insert into fileinfo (name, path, filesize, description ) "
+            + "values (#{name}, #{path}, #{filesize},#{description})")
+    @Options(useGeneratedKeys = true, keyProperty = "fileid")
+    int insertFile(FileInfo file);
+
+    @Select("select * from fileinfo")
+    List<FileInfo> list();
+
+    @Select("select * from fileinfo where fileid=#{fileid}")
+    FileInfo fileOne(int fileid);
+
+}
+
+
+
+
+[FileinfoService.java]
+
+package com.example.julspringcrawling.service;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.julspringcrawling.dao.FileinfoDao;
+import com.example.julspringcrawling.dto.FileInfo;
+
+@Service
+public class FileinfoService {
+	@Autowired
+	FileinfoDao dao;
+	
+	public int insertFile(FileInfo file) {
+		return dao.insertFile(file);
+	}
+	public List<FileInfo>  list(){
+		return dao.list();
+	}
+	public FileInfo fileOne(int fileid) {
+		return dao.fileOne(fileid);
+	}
+}
+
+
+package com.example.julspringcrawling.controller;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.julspringcrawling.dto.FileInfo;
+import com.example.julspringcrawling.service.FileinfoService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Controller
+public class UploadController {
+
+	@Autowired
+	FileinfoService service;
+
+	@GetMapping("/filedownload/{fileid}")
+	public void fileDownload(@PathVariable("fileid") int id, HttpServletResponse response, HttpServletRequest request) throws IOException {
+		//DB select - id에 맞는 레코드 한줄 꺼내옴
+		FileInfo dto = service.fileOne(id);
+		String path = ResourceUtils.getFile("classpath:static").toPath().toString();
+		//다운로드 받을 파일 선택
+		File file = new File(path, dto.getPath());
+		
+		// 다운로드 받을 파일이름을 인코딩함
+		String fileName = new String(dto.getName().getBytes("utf-8"), "iso-8859-1");
+
+		response.setContentType("application/octet-stream; charset=utf-8");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
+		//attachment : 보여줄 수 있는 형식의 파일도 무조건 다운로드
+		//filename : 다운로드 받을 파일명 지정
+		response.setHeader("Content-Transfer-Encoding", "binary");
+
+		OutputStream out = response.getOutputStream();
+
+		try (FileInputStream fis = new FileInputStream(file);){
+			FileCopyUtils.copy(fis, out);
+		}catch (Exception e) {
+			System.out.println("파일 없음");
+		}
+		out.flush();
+	}
+	
+	
+	@GetMapping("/list")
+	public String list(Model m) {
+		//DB 연동
+		List<FileInfo> flist = service.list();
+		m.addAttribute("flist", flist);
+		return "file/list";
+	}
+	
+	
+	@GetMapping("/upload")
+	public String form() {
+		return "file/fileform";
+	}
+
+	@PostMapping("/upload")
+	public String submit(@ModelAttribute("dto") FileInfo dto, 
+							@RequestParam("file") MultipartFile file) {
+		if (!file.getOriginalFilename().equals("")) {
+			// upload
+			String filename = upload(file);//업로드 된 파일명
+			// DB insert
+			dto.setName(file.getOriginalFilename());
+			dto.setPath("/upload/"+filename);
+			dto.setFilesize(file.getSize());
+			
+			service.insertFile(dto);
+			
+			// model 파일 정보 추가
+		}
+
+		return "file/result";
+	}
+
+	private String makeFileName(String origName) {
+		// ms+_random.확장자
+		long currentTime = System.currentTimeMillis();
+		Random random = new Random();
+		int r = random.nextInt(50); // 0 ~ 49 랜덤 발생
+		int index = origName.lastIndexOf(".");
+		String ext = origName.substring(index);
+
+		return currentTime + "_" + r + ext;
+	}
+
+	private String upload(MultipartFile file) {
+		String newFileName = makeFileName(file.getOriginalFilename());
+		File newFile = null;
+
+		try {
+			String path = ResourceUtils.getFile("classpath:static/upload/").toPath().toString();
+			newFile = new File(path, newFileName);
+			
+			file.transferTo(newFile);
+
+		} catch (IOException | IllegalStateException e) {
+			e.printStackTrace();
+		}
+		return newFileName;
+	}
+
+}
+
+
+[file/fileform.html]
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>파일 업로드</title>
+</head>
+<body>
+<h3>파일을 선택하세요</h3>
+<form method="post" enctype="multipart/form-data">
+	<input type="file" name="file">
+	<input type="text" name="description">
+	<input type="submit" value="upload">
+</form>
+</body>
+</html>
+
+
+[flie/result.html]
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>파일 업로드</title>
+</head>
+
+<body>
+
+    <div th:if="${dto.fileid != 0 }">
+        <h3>파일 업로드가 되었습니다.</h3>
+        파일번호 : [[${dto.fileid}]] <br>
+        파일명 : [[${dto.name }]] <br>
+        파일 사이즈 : [[${dto.filesize }]]
+        업로드 된 파일이름 : [[${dto.path }]]<br>
+        <img th:src="${dto.path }" alt="test">
+    </div>
+    <div th:if="${dto.fileid == 0 }">
+        파일을 선택하지 않았습니다. <br>
+        <span onclick="history.go(-1)" style="text-decoration: underline;">다시
+            선택</span>하세요
+    </div>
+</body>
+
+</html>
+
+
+
+
+[file/list.html]
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>파일 목록</title>
+</head>
+
+<body>
+
+	<a href="/upload">자료실 파일 업로드</a>
+	<h3>업로드한 파일 목록</h3>
+	<table border="1">
+		<tr>
+			<th>파일 번호</th>
+			<th>파일 이름</th>
+			<th>파일 크기</th>
+			<th>설명</th>
+		</tr>
+
+		<tr th:each="dto:${flist}">
+			<td th:text="${dto.fileid}"></td>
+			<td> <a th:href="@{/filedownload/{fileid}(fileid=${dto.fileid})}" th:text="${dto.name }"></a></td>
+			<td>[[${dto.filesize }]] byte</td>
+			<td>[[${dto.description }]]</td>
+		</tr>
+
+	</table>
+</body>
+
+</html>
+
+
+

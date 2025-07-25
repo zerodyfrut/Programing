@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 목록</title>
+</head>
+
+<body>
+    <a href="/upload">자료실 파일 업로드</a>
+    <h3>업로드한 파일 목록</h3>
+    <table border="1">
+        <tr>
+            <th>파일 번호</th>
+            <th>파일명</th>
+            <th>파일 크기</th>
+            <th>설명</th>
+        </tr>
+
+        <tr th:each="dto:${flist}">
+            <td th:text="${dto.fileid}"></td>
+            <td> <a th:href="@{/filedownload/{fileid}(fileid=${dto.fileid})}" th:text="${dto.name}"></a></td>
+            <td>[[${dto.filesize}]] byte</td>
+            <td>[[${dto.description}]]</td>
+        </tr>
+    </table>
+
+</body>
+
+</html>
