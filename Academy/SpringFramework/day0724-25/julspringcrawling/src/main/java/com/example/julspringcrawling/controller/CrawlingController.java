@@ -12,7 +12,6 @@ import com.example.julspringcrawling.command.BibleCommand;
 import com.example.julspringcrawling.command.NewsCommand;
 import com.example.julspringcrawling.service.CrawlingService;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class CrawlingController {

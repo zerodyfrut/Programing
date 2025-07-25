@@ -39,6 +39,9 @@ dependencies {
 	implementation 'org.apache.poi:poi:5.4.1'
 	// https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
 	implementation 'org.apache.poi:poi-ooxml:5.4.1'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+
 
 tasks.named('test') {
 	useJUnitPlatform()
