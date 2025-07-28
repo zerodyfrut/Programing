@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유효성 form</title>
+</head>
+
+<body>
+    <form action="/valid/create" th:object="${command}">
+        <!-- 객체 전체에 대한 에러 메세지 출력 -->
+        <div th:if="${#fields.hasGlobalErrors()}" style="color:red;">
+            <ul>
+                <li th:each="err : ${#fields.globalErrors()}" th:text="${err}"></li>
+            </ul>
+        </div>
+
+        <!-- *{변수명} : 객체에 있는 변수에 접근, id,name, value 자동완성  -->
+        ID : <input th:field="*{id}"><br>
+
+        WRITER : <input th:field="*{writer}">
+        <span th:if="${#fields.hasErrors('writer')}" th:errors="*{writer}" style="color: red"></span><br>
+        CONTENT: <textarea th:field="*{content}" placeholder="10-20자로 작성"></textarea>
+        <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" style="color: red"></div>
+        <input type="submit" value="전송">
+    </form>
+</body>
+
+</html>
