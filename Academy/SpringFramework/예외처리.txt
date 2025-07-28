@@ -1,0 +1,143 @@
+[errors/boardError.html]
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>   
+</head>
+<body>
+<h1><font color="green">BoardException 발생!</font></h1>
+<a href="/"> index로 이동 </a><hr>
+<table>
+<tr>
+	<th bgcolor="green" align="left">예외 메세지 : [[${exception.message}]]</th>
+</tr>
+</table>
+</body>
+</html>
+
+[errors/globalError.html]
+<%@ page isErrorPage="true" %>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8" />
+</head>
+<body>
+<h1><font color="orange">Exception 발생!</font></h1>
+<a href="/"> index로 이동 </a><hr>
+<table>
+<tr>
+	<th bgcolor="orange" align="left">예외 메세지 : [[${exception.message}]]</th>
+</tr>
+
+</table>
+</body>
+</html>
+
+[errors/sqlError.html]
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8" />
+</head>
+<body>
+<h1><font color="red">SQLException 발생!</font></h1>
+<a href="/"> index로 이동 </a><hr>
+<table>
+<tr>
+	<th bgcolor="red" align="left">예외 메세지 : [[${exception.message}]]</th>
+</tr>
+
+</table>
+</body>
+</html>
+
+
+[BoardException.java]
+package com.example.exception;
+
+public class BoardException extends RuntimeException {
+	
+	private static final long serialVersionUID = 1L;
+
+	public BoardException(String message) {
+		super(message);
+	}
+}
+
+[BoardNotFoundException.java]
+
+package com.example.exception;
+
+public class BoardNotFoundException extends BoardException {
+	private static final long serialVersionUID = 1L;
+
+	public BoardNotFoundException(String message) {
+		super(message);
+	}
+}
+
+[GlobalExceptionHandler.java]
+package com.example.exception;
+
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+	
+	@ExceptionHandler(BoardException.class)
+	public String handleCustomException(BoardException exception, Model model) {
+		model.addAttribute("exception", exception);
+		return "/errors/boardError";
+	}
+
+	@ExceptionHandler(Exception.class)
+	public String handleException(Exception exception, Model model) {
+		model.addAttribute("exception", exception);
+		return "/errors/globalError";
+	}
+}
+
+
+
+[ExceptionController.java]
+
+package myapp.test.controller;
+
+import java.sql.SQLException;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import myapp.test.exception.BoardNotFoundException;
+
+@Controller
+public class ExceptionController {
+
+	@RequestMapping("/boardError")
+	public String boardError() {
+		throw new BoardNotFoundException("검색된 게시글이 없습니다.");
+	}
+
+	@RequestMapping("/illegalArgumentError")
+	public String ellegalArgumentError() {
+		throw new IllegalArgumentException("부적절한 인자가 전달되었습니다.");
+	}
+
+	@RequestMapping("/sqlError")
+	public String sqlError() throws SQLException {
+		throw new SQLException("SQL 구문에 오류가 있습니다.");
+	}
+	
+	@ExceptionHandler(SQLException.class)
+	public String numberFormatError(SQLException exception, Model model) {
+		model.addAttribute("exception", exception);
+		return "/errors/sqlError";
+	}
+
+}

@@ -1,0 +1,149 @@
+타임리프(Thymeleaf)  기능
+
+1. text 출력
+<태그 th:text="${data}">
+<태그 th:utext="${data}">
+
+<span>hello [[${data}]]</span>
+<span>hello [(${data})]</span>
+
+
+2. attribute
+
+타임리프는 주로 HTML 태그에 th:'속성명' 을 지정하는 방식으로 동작한다. 
+th:'속성명' 로 속성을 적용하면 기존 속성을 대체한다.
+만약 기존 속성이 없으면 새로 만든다.
+checkbox 같은 경우 th:checked="true, false" 로 사용한다
+
+<input type="text" name="mock" th:name="userA" />
+
+
+- th:attrappend class 속성 뒤에 붙는다 = <input type="text" class="text" th:attrappend="class=' large'" /><br/>
+- th:attrprepend class 속성 앞에 붙는다 = <input type="text" class="text" th:attrprepend="class='large '" /><br/>
+- th:classappend class 속성에 자연스럽게 추가 = <input type="text" class="text" th:classappend="자연스럽게"><br/>
+
+- checked o <input type="checkbox" name="active" th:checked="true" /><br/>
+- checked x <input type="checkbox" name="active" th:checked="false" /><br/>
+- checked=false <input type="checkbox" name="active" checked="false" /><br/>
+
+
+
+
+3. 반복
+<태그 th:each="변수 : 컬렉션">
+List, 배열, Iterable, Enumeration을 구현한 모든 객체를 반복에 사용 가능
+Map의 경우는 Map.Entry가 변수에 담긴다.
+
+<tr th:each="user : ${ulist}">
+    <td th:text="${user.name}">name</td>
+    <td th:text="${user.age}">0</td>
+</tr>
+th:each="변수, 상태변수 : 컬렉션"
+-자바의 for-each와 비슷하다
+-두 번째 파라미터를 설정하여 반복의 상태를 확인할 수 있다.
+-반복 상태를 나타내 주는 상태변수는 생략이 가능하며 자동으로 [ 변수명 + Stat ] 명칭을 부여받는다.
+
+<tr th:each="user, userStat : ${users}">
+
+index : 0 부터 시작하는 값
+th:text="${userStat.index}
+
+count : 1부터 시작하는 값(회차)
+th:text="${userStat.count}
+
+size : 전체 사이즈
+th:text="${userStat.size}
+
+even, odd : 홀수, 짝수 여부(boolean)
+th:text="${userStat.even} th:text="${userStat.odd}
+
+first, last : 처음, 마지막 여부(boolean)
+h:text="${userStat.first} th:text="${userStat.last}
+
+current : 현재 객체
+th:text="${userStat.current}
+
+
+
+4. 조건문
+
+if, unless
+
+해당 조건이 맞지 않으면 태그 자체를 렌더링하지 않는다.
+if : 조건이 참일 경우 렌더링
+unless : 조건이 거짓일 경우 렌더링
+
+<span th:text="'미성년자'" th:if="${user.age lt 20}"></span>
+<span th:text="'미성년자'" th:unless="${user.age ge 20}"></span>
+
+
+switch
+ 
+조건에 맞는 case를 렌더링
+만족하는 조건이 없을 때  *  이 렌더링 된다.
+
+<td th:switch="${user.age}">
+  <span th:case="10">10살</span>
+  <span th:case="20">20살</span>
+  <span th:case="*">기타</span>
+</td>
+
+
+5. 주석
+-1. 표준 HTML 주석 :  자바스크립트의 표준 HTML 주석은 타임리프가 렌더링 하지 않고, 그대로 남겨둔다.<!-- 내용 -->
+-2. 타임리프 파서 주석 : 타임리프에서 사용하는 진짜 주석이다. 렌더링에서 주석 부분을 제거한다.<!--/* 내용 */-->
+
+
+6. 문자열 결합
+
+Thymeleaf에서 문자열 조합을 하려면..
+
+<div th:text="'Hello, ' + ${name} + '!!'"></div>
+먼가 지저분하다. 이럴 때, |로 싸주면 문자열을 조합할 수 있다.
+
+<div th:text="|Hello, ${name}!!|"></div>
+
+
+7. 날짜값 포맷
+
+값을 standard 포맷에 맞게 변환
+${#dates.format(date)}
+${#dates.arrayFormat(datesArray)}
+${#dates.listFormat(datesList)}
+${#dates.setFormat(datesSet)}
+
+// 값을 ISO8601 포맷에 맞게 변환
+${#dates.formatISO(date)}
+${#dates.arrayFormatISO(datesArray)}
+${#dates.listFormatISO(datesList)}
+${#dates.setFormatISO(datesSet)}
+
+// 값을 지정된 포맷에 맞게 변환
+${#dates.format(date, 'dd/MMM/yyyy HH:mm')}
+${#dates.arrayFormat(datesArray, 'dd/MMM/yyyy HH:mm')}
+${#dates.listFormat(datesList, 'dd/MMM/yyyy HH:mm')}
+${#dates.setFormat(datesSet, 'dd/MMM/yyyy HH:mm')}
+
+// dates 객체의 특정 요소값
+${#dates.day(date)}                    
+${#dates.month(date)}                  
+${#dates.monthName(date)}              
+${#dates.monthNameShort(date)}         
+${#dates.year(date)}                   
+${#dates.dayOfWeek(date)}              
+${#dates.dayOfWeekName(date)}          
+${#dates.dayOfWeekNameShort(date)}     
+${#dates.hour(date)}                   
+${#dates.minute(date)}                 
+${#dates.second(date)}                 
+${#dates.millisecond(date)}            
+
+// dates 객체 생성
+${#dates.create(year,month,day)}
+${#dates.create(year,month,day,hour,minute)}
+${#dates.create(year,month,day,hour,minute,second)}
+${#dates.create(year,month,day,hour,minute,second,millisecond)}
+${#dates.createNow()}
+${#dates.createNowForTimeZone()}
+${#dates.createToday()}
+${#dates.createTodayForTimeZone()}
