@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h5>모든 사원 정보 출력</h5>
+    <table>
+        <tr>
+            <th>부서명</th>
+            <th>사원번호</th>
+            <th>사원이름</th>
+            <th>직급</th>
+            <th>연봉</th>
+            <th>입사일자</th>
+        </tr>
+        <tr th:each="emp:${page.content}">
+            <td th:text="${emp.dept.dname}"></td>
+            <td th:text="${emp.empno}"></td>
+            <td th:text="${emp.ename}"></td>
+            <td th:text="${emp.job}"></td>
+            <td th:text="${emp.sal}"></td>
+            <td th:text="${#dates.format(emp.hiredate,'yyyy/MM/dd')}"></td>
+        </tr>
+    </table>
+
+    <div class="page">
+
+    <a th:href="@{/emp/emps(p=0)}" th:if="${!page.first}">처음</a>
+    <a th:href="@{/emp/emps(p=${page.number-1})}" th:if="${page.hasPrevious()}">이전</a>
+
+
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+            <a th:href="@{/emp/emps(p=${i})}" th:text="${i + 1}"
+                th:classappend="${i == page.number} ? 'active' : ''">페이지</a>
+        </span>
+
+    <a th:href="@{/emp/emps(p=${page.number + 1})}" th:if="${page.hasNext()}">다음</a>
+    <a th:href="@{/emp/emps(p=${page.totalPages - 1})}" th:if="${!page.last}">끝</a>
+    </div>
+
+    <br>
+    <a href="/">홈으로</a>
+
+
+</body>
+
+</html>

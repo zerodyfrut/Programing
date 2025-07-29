@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h5>사원정보 입력</h5>
+    <form action="/emp/insert" method="post">
+        부서 :
+        <select name="dept.deptno">
+            <option th:each="dept:${dlist}" th:value="${dept.deptno}" th:text="${dept.dname}"></option>
+        </select><br>
+        사번 : <input name="empno" placeholder="추후 자동생성"><br>
+        이름 : <input name="ename"><br>
+        직급 : <input name="job"><br>
+        입사일자 : <input type="date" name="hiredate"><br>
+        급여 : <input name="sal"><br>
+        <input type="submit">
+
+    </form>
+</body>
+
+</html>
