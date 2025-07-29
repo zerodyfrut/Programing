@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h5>사원 정보 리스트</h5>
+    <p>'[[${search}]]'으로 검색한 결과입니다.</p>
+    <button id="dbtn">전체삭제</button>
+    <table>
+        <tr>
+            <th>사원번호</th>
+            <th>사원명</th>
+            <th>직급</th>
+            <th>입사일</th>
+            <th>급여</th>
+            <th>부서명</th>
+        </tr>
+        <tr th:each="emp :${page.content}">
+            <th><a th:href="@{/update/form/{empno}(empno=${emp.empno})}" th:text="${emp.empno}"></a></th>
+            <th th:text="${emp.ename}"></th>
+            <th th:text="${emp.job}"></th>
+            <th th:text="${#dates.format(emp.hiredate, 'yyyy/MM/dd')}"></th>
+            <th th:text="${emp.sal}"></th>
+            <th th:text="${emp.dept.dname}"></th>
+            <th> <a th:href="@{/delete/form/{empno}(empno=${emp.empno})}">
+                    <input type="button" value="삭제"></a></th>
+        </tr>
+    </table>
+    <div class="page">
+
+        <a th:href="@{/result1(p=0,name=${search})}" th:if="${!page.first}">처음</a>
+        <a th:href="@{/result1(p=${page.number - 1},name=${search})}" th:if="${page.hasPrevious()}">이전</a>
+
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+            <a th:href="@{/result1(p=${i},name=${search})}" th:text="${i + 1}"
+                th:classappend="${i == page.number} ? 'active' : ''">페이지</a>
+        </span>
+
+        <a th:href="@{/result1(p=${page.number + 1},name=${search})}" th:if="${page.hasNext()}">다음</a>
+        <a th:href="@{/result1(p=${page.totalPages - 1},name=${search})}" th:if="${!page.last}">끝</a>
+    </div>
+
+    <script>
+        const dbtn = document.getElementById("dbtn");
+        dbtn.addEventListener("click", () => {
+            
+        })
+    </script>
+</body>
+
+</html>
