@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h5>사원 정보 리스트</h5>
+    <p>'[[${search}]]'으로 검색한 결과입니다.</p>
+    <table>
+        <tr>
+            <th><button id="dbtn">삭제</button></th>
+            <th>사원번호</th>
+            <th>사원명</th>
+            <th>직급</th>
+            <th>입사일</th>
+            <th>급여</th>
+            <th>부서명</th>
+        </tr>
+        <tr th:each="emp :${page.content}">
+            <th>
+                <input type="checkbox" name="empno" th:value="${emp.empno}">
+            </th>
+            <th>
+                <a th:href="@{/update/form/{empno}(empno=${emp.empno})}" th:text="${emp.empno}"></a>
+            </th>
+            <th th:text="${emp.ename}"></th>
+            <th th:text="${emp.job}"></th>
+            <th th:text="${#dates.format(emp.hiredate, 'yyyy/MM/dd')}"></th>
+            <th th:text="${emp.sal}"></th>
+            <th th:text="${emp.dept.dname}"></th>
+        </tr>
+    </table>
+    <div class="page">
+
+        <a th:href="@{/result1(p=0,name=${search})}" th:if="${!page.first}">처음</a>
+        <a th:href="@{/result1(p=${page.number - 1},name=${search})}" th:if="${page.hasPrevious()}">이전</a>
+
+
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+            <a th:href="@{/result1(p=${i},name=${search})}" th:text="${i + 1}"
+                th:classappend="${i == page.number} ? 'active' : ''">페이지</a>
+        </span>
+
+        <a th:href="@{/result1(p=${page.number + 1},name=${search})}" th:if="${page.hasNext()}">다음</a>
+        <a th:href="@{/result1(p=${page.totalPages - 1},name=${search})}" th:if="${!page.last}">끝</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const dbtn = document.getElementById("dbtn");
+        dbtn.addEventListener("click", () => {
+            const checked = document.querySelectorAll("input[name='empno']:checked");
+            const empnos = Array.from(checked).map(cb => parseInt(cb.value));
+
+            if (empnos.length === 0) {
+                alert("삭제할 사원을 선택하세요.");
+                return;
+            }
+            axios.delete('/delete', {
+                data: empnos, // 여기에 data 키가 꼭 필요함!
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('삭제 성공:', response.data);
+                    location.href="/";
+                })
+                .catch(error => {
+                    console.error('삭제 실패:', error);
+                });
+
+        });
+
+
+    </script>
+
+</body>
+
+</html>

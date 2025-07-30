@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h5>모든 부서 정보를 출력합니다.</h5>
+    <table>
+        <tr><th>부서번호</th><th>부서명</th><th>근무지</th><th>인원수</th></tr>
+        <tr th:each="dept:${dlist}">
+            <td th:text="${dept.deptno}"></td>
+            <td th:text="${dept.dname}"></td>
+            <td th:text="${dept.loc}"></td>
+            <td th:text="${dept.elist.size()}"></td>
+        </tr>
+    </table>
+</body>
+</html>
