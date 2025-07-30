@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h5>급여 수정</h5>
+    <form method="post">
+        <!--사원 번호는 URI에 담아서 보냄-->
+        새로운 급여 : <input name="newsal">
+        <input type="hidden" name="_method" value="patch">
+        <input type="submit">
+    </form>
+</body>
+</html>
