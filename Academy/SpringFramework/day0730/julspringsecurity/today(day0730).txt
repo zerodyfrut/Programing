@@ -1,0 +1,13 @@
+새로운 URL 요청시마다 - request, response 생성
+
+새로운 client 접속시(브라우저) - session 생성
+                              page가 바뀌어도 session 유지(log상태 등이 유지되는 것)
+                              logout 하거나 시간이 지나야 session 사라짐
+
+회원 role 수정
+admin 권한자만 가능하게
+/list ->전체 회원 list 출력
+회원 선택시 ->회원의 상세정보 페이지
+
+GET:/update 회원 상세정보 페이지(여기서 수정)
+POST(PATCH도 상관없음):/update 회원 정보 수정 후 list로 이동

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPDATE</title>
+</head>
+
+<body>
+    <table th:each="user : ${userList}">
+        <th>username</th>
+        <!-- <th>password</th> -->
+        <th>name</th>
+        <th>role</th>
+        <tr>
+            <td><a th:href="@{/update(username=${user.username})}" th:text="${user.username}"></a></td>
+            <!-- <td th:text="${user.password}"></td> -->
+            <td th:text="${user.name}"></td>
+            <td th:text="${user.role}"></td>
+        </tr>
+       
+      
+    </table>
+
+    <a href="/">홈으로</a>
+</body>
+
+</html>
