@@ -41,6 +41,11 @@
     <div sec:authorize="!hasAnyRole('MANAGER','ADMIN','MEMBER')">
         <a href="/insert">회원가입</a><br>
     </div>
+
+    <div sec:authorize="hasAnyRole('MANAGER','ADMIN','MEMBER')">
+        <a href="/api/questions">QNA 게시글</a><br>
+    </div>
+    
 </body>
 
 </html>

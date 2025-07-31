@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QNA DETAIL</title>
+</head>
+
+<body>
+    <h2>QNA 상세 보기</h2>
+
+    <div>
+        제목: <span th:text="${question.title}"></span><br>
+        내용:<p th:text="${question.content}"></p>
+        <br>
+        작성자 :<span th:text="${question.users.name}"></span><br>
+    </div>
+
+
+    <form th:action="@{/api/questions/update/{no}(no=${question.qno})}">
+        <input type="submit" value="수정하기">
+    </form>
+
+    <form th:action="@{/api/questions/{no}(no=${question.qno})}" method="post">
+        <input type="hidden" name="_method" value="delete" />
+        <input type="submit" th:value="삭제">
+    </form>
+
+    <hr>
+
+    <h3>댓글 목록</h3>
+    <form th:action="@{/api/questions/{no}/answers(no=${question.qno})}" method="get">
+        <input type="submit" value="댓글쓰기">
+    </form>
+    <div th:each="answer : ${answers}">
+
+        <p th:text="'Title : '+${answer.title} + '(작성자 : ' + ${answer.question.users.name} +')'"></p>
+        <p th:text="'Content : ' + ${answer.content} "></p>
+        <form th:action="@{/api/answers/{id}(id=${answer.ano})}" method="post">
+            <input type="hidden" name="_method" value="put" />
+
+            <input type="submit" value="수정">
+        </form>
+        <form action="">
+            <input type="hidden" name="_method" value="delete" />
+
+            <input type="submit" value="삭제">
+        </form>
+    </div>
+
+    <hr>
+    <a th:href="@{/api/questions}"><button type="button">목록으로</button></a>
+</body>
+
+</html>
