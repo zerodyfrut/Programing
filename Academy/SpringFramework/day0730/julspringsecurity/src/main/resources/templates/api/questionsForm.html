@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form th:action="@{/api/questions}" method="post">
+
+        <h3>게시글 쓰기</h3>
+        title : <input type="text" name="title"><br>
+        content : <textarea name="content"></textarea><br>
+
+        <input type="submit">
+    </form>
+</body>
+
+</html>
