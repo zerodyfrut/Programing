@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수정하기</title>
+</head>
+
+<body>
+    <form th:action="@{/api/questions/update/{id}(id=${question.qno})}" method="post">
+        <input type="hidden" name="_method" value="put" />
+
+        <div>
+            제목: <input name="title" th:value="${question.title}"><br>
+            내용:<textarea name="content" th:text="${question.content}"></textarea><br>
+            <input type="submit">
+        </div>
+    </form>
+
+</body>
+
+</html>

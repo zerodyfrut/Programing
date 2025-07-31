@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QNA LIST</title>
+</head>
+
+<body>
+  <h3>QNA LIST</h3>
+  <table>
+
+    <tr>
+      <th>순번</th>
+      <th>제목</th>
+      <th>작성자</th>
+    </tr>
+    <tr th:each="q : ${questions}">
+      <td th:text="${q.qno}">
+      </td>
+      <td>
+        <a th:href="@{/api/questions/{qno}(qno=${q.qno})}" th:text="${q.title}"></a>
+      </td>
+      <td th:text="${q.users.name}">
+      </td>
+      <td>
+        <form th:action="@{/api/questions/{qno}(qno=${q.qno})}" method="post">
+          <input type="hidden" name="_method" value="delete" />
+          <input type="submit" th:value="삭제">
+        </form>
+      </td>
+
+    </tr>
+  </table>
+
+  <a th:href="@{/api/questionsForm}">
+    <button type="button">글쓰기</button>
+  </a>
+
+  <hr>
+  <a href="/">홈으로</a>
+
+</body>
+
+</html>
