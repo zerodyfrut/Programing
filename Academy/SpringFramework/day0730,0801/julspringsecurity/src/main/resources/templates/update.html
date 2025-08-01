@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPDATE</title>
+</head>
+<body>
+    <h3>회원정보 수정</h3>
+    <form th:action="@{/update}" method="post">
+         <input type="hidden" name="username" th:value="${username}">
+         
+         name: <input type="text" name="name" th:value="${name}">
+         password : <input type="password" name="password">
+
+
+        권한 :  <select name="role">
+            <option value="ROLE_MEMBER" th:selected="${role==ROLE_MEMBER}">일반사용자</option>
+            <option value="ROLE_MANAGER" th:selected="${role==ROLE_MANAGER}">매니저</option>
+            <option value="ROLE_ADMIN" th:selected="${role==ROLE_ADMIN}">ADMIN</option>
+            
+            </select>
+        <input type="submit">
+    </form>
+</body>
+</html>

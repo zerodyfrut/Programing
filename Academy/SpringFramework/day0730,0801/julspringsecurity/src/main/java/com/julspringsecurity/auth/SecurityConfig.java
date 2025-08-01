@@ -36,7 +36,9 @@ public class SecurityConfig {
                     // admin과 하위경로에 대해."MANAGER"와 "ADMIN" 중 하나의 권한이 있는()
                     .anyRequest().permitAll();
             // 나머지 요청에 대해 모두 허가.
-        });
+        }).exceptionHandling((exception) -> exception
+                .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/login"))
+                .accessDeniedPage("/accessDenied"));
 
         // 커스텀한 로그인 사용
         http.formLogin((formLogin) -> {

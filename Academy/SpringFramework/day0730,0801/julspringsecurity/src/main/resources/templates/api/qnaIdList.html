@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -34,14 +34,13 @@
     </form>
     <div th:each="answer : ${answers}">
 
-        <p th:text="'Title : '+${answer.title} + '(작성자 : ' + ${answer.question.users.name} +')'"></p>
+        <p th:text="'Title : '+${answer.title} + '(작성자 : ' + ${answer.users.name} +')'"></p>
         <p th:text="'Content : ' + ${answer.content} "></p>
-        <form th:action="@{/api/answers/{id}(id=${answer.ano})}" method="post">
-            <input type="hidden" name="_method" value="put" />
+        <form th:action="@{/api/answers/update/{id}(id=${answer.ano})}">
 
             <input type="submit" value="수정">
         </form>
-        <form action="">
+        <form th:action="@{/api/answers/{id}(id=${answer.ano})}" method="post">
             <input type="hidden" name="_method" value="delete" />
 
             <input type="submit" value="삭제">
