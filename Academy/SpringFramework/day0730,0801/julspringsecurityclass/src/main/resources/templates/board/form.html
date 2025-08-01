@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 작성</title>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
+</head>
+<body>
+<h2>게시글 작성</h2>
+
+<form id="postForm" th:action="@{/api/auth/questions}" method="post">
+    <label for="title">제목:</label><br>
+    <input type="text" name="title" id="title" required><br><br>
+    <label for="editor">내용:</label><br>
+    <textarea id="editor"></textarea>
+    <input type="hidden" name="content" id="hiddenContent"><br><br>
+
+    <button type="submit">작성하기</button>
+</form>
+
+<script>
+    let editorInstance;
+
+    ClassicEditor
+        .create(document.querySelector('#editor'))
+        .then(editor => {
+            editorInstance = editor;
+
+            // 폼 submit 이벤트 등록은 editor 생성 완료 후!
+            document.getElementById('postForm').addEventListener('submit', function (e) {
+                const content = editorInstance.getData();
+                document.getElementById('hiddenContent').value = content;
+            });
+        })
+        .catch(error => {
+            console.error('Editor 초기화 실패:', error);
+        });
+</script>
+</body>
+</html>
