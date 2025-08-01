@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RequestMapping("/api")
 @Controller
 public class QnaController {
@@ -89,8 +88,12 @@ public class QnaController {
     @PutMapping("/questions/update/{id}")
     public String updateQuestion(@PathVariable int id, Question newQuestion) {
         Question question = questionDao.findById(id).orElseThrow();
+
+        Date date = new Date();
+
         question.setTitle(newQuestion.getTitle());
         question.setContent(newQuestion.getContent());
+        question.setUpdate_at(date);
 
         questionDao.save(question);
         // 이러면 수정이 아니라 새로 만들어 지려나? ->qno 같은번호쓰게끔 -> 덮어쓰기
@@ -120,36 +123,82 @@ public class QnaController {
     }
 
     @GetMapping("questions/{no}/answers")
-    public String writeAnswer(@PathVariable("no") int questionId, Model m) {
+    public String writeAnswer(@PathVariable("no") int questionId, Model m, Answer answer) {
         Question question = questionDao.findById(questionId).orElseThrow();
+
+        if (answer.getAno() == 0) {
+            m.addAttribute("answer", new Answer());
+        } else {
+            m.addAttribute("answer", answer);
+        }
+
         m.addAttribute("question", question);
+
         return "api/answerForm";
     }
 
     @PostMapping("answers")
     public String insertAnswer(Answer answer, @AuthenticationPrincipal SecurityUser user) {
-        Date date=new Date();
+        Date date = new Date();
 
-        answer.getQuestion().setUsers(user.getUsers());
+        answer.setUsers(user.getUsers());
         answer.setCreate_at(date);
         answerDao.save(answer);
-        
-        return "redirect:/api/questions/"+answer.getQuestion().getQno();
+
+        return "redirect:/api/questions/" + answer.getQuestion().getQno();
     }
-    
+
+    @GetMapping("/answers/update/{id}")
+    public String updateAnswerForm(@PathVariable int id, Model m, @AuthenticationPrincipal SecurityUser user) {
+        Answer answer = answerDao.findById(id).orElseThrow();
+
+        if (!answer.getUsers().getUsername().equals(user.getUsername())) {
+            return "redirect:/accessDenied";
+        }
+
+        Question question = answer.getQuestion();
+        m.addAttribute("answer", answer);
+        m.addAttribute("question", question);
+        return "api/answerForm";
+    }
 
     @PutMapping("answers/{id}")
-    public String updateAnswer(@PathVariable int id, Answer answer) {
+    public String updateAnswer(@PathVariable int id, Answer newAnswer, Model m,
+            @AuthenticationPrincipal SecurityUser user) {
+        Answer answer = answerDao.findById(id).orElseThrow();
 
+        if (answer.getUsers().getUsername().equals(user.getUsername())) {
 
-        answerDao.save(answer);
-        return "redirect:/questions";
+            Date date = new Date();
+
+            answer.setTitle(newAnswer.getTitle());
+            answer.setContent(newAnswer.getContent());
+            answer.setUpdate_at(date);
+
+            answerDao.save(answer);
+            m.addAttribute("answer", answer);
+            return "redirect:/api/questions/" + answer.getQuestion().getQno();
+        } else {
+            return "redirect:/accessDenied";
+
+        }
     }
 
     @DeleteMapping("answers/{id}")
-    public String deleteAnswer(@PathVariable int id) {
-        answerDao.deleteById(id);
+    public String deleteAnswer(@PathVariable int id, @AuthenticationPrincipal SecurityUser user) {
+        Optional<Answer> optionalAnswer = answerDao.findById(id);
+        if (optionalAnswer.isPresent()) {
+            Answer answer = optionalAnswer.get();
 
-        return "redirect:/questions";
+            // 로그인한 사용자의 username과 글 작성자의 username 비교
+            if (answer.getUsers().getUsername().equals(user.getUsername())) {
+                answerDao.deleteById(id);
+            } else {
+                // 작성자가 아닌 경우 권한 없음 페이지로 리디렉션하거나 예외 처리
+                return "redirect:/accessDenied";
+            }
+            return "redirect:/api/questions/" + answer.getQuestion().getQno();
+        }
+        return "redirect:/api/questions";
     }
 }

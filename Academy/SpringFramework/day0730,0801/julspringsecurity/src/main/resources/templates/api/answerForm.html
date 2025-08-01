@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form th:if="${answer.ano == 0}" th:action="@{/api/answers}" method="post">
+        <input type="hidden" name="question.qno" th:value="${question.qno}" />
+
+        Title : <input type="text" name="title"><br>
+        Content :<textarea name="content"></textarea><br>
+        <input type="submit" value="등록">
+
+    </form>
+
+    <form th:if="${answer.ano!=0}" th:action="@{/api/answers/{id}(id=${answer.ano})}" method="post">
+        <input type="hidden" name="_method" value="put" />
+        <input type="hidden" name="question.qno" th:value="${question.qno}" />
+
+        Title : <input type="text" name="title" th:value="${answer.title}"><br>
+        Content :<textarea name="content" th:text="${answer.content}"></textarea><br>
+        <input type="submit" value="수정">
+
+
+    </form>
+
+
+</body>
+
+</html>

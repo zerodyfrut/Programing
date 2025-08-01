@@ -14,7 +14,7 @@
         <th>name</th>
         <th>role</th>
         <tr>
-            <td><a th:href="@{/update(username=${user.username})}" th:text="${user.username}"></a></td>
+            <td><a th:href="@{/update/{username}(username=${user.username})}" th:text="${user.username}"></a></td>
             <!-- <td th:text="${user.password}"></td> -->
             <td th:text="${user.name}"></td>
             <td th:text="${user.role}"></td>
