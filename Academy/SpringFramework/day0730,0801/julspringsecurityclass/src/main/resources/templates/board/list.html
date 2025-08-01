@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div>
+        <h5>Q & A LIST</h5> <span> <a href="/api/auth/form">새 질문 작성하기</a></span>
+    </div>
+    <table border="1">
+        <tr>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+            <th>답변수</th>
+        </tr>
+        <tr th:each="article :${page.content}">
+            <td><a th:href="@{/api/question/{qno}(qno=${article.qno})}" th:text="${article.title}"></a></td>
+
+            <td th:text="${article.author != null ? article.author.username : '알 수 없음'}"></td>
+            <!-- LocalDateTime 타입 : #temporals 사용 -->
+            <td th:text="${#temporals.format(article.createdAt, 'yy.MM.dd')}"></td>
+            <td th:text="${article.answerList.size()}"></td>
+        </tr>
+    </table>
+    <div class="page">
+
+        <a th:href="@{/api/questions(p=0)}" th:if="${!page.first}">처음</a>
+        <a th:href="@{/api/questions(p=${page.number - 1})}" th:if="${page.hasPrevious()}">이전</a>
+
+
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+            <a th:href="@{/api/questions(p=${i})}" th:text="${i + 1}"
+                th:classappend="${i == page.number} ? 'active' : ''">페이지</a>
+        </span>
+
+        <a th:href="@{/emp/emps(p=${page.number + 1})}" th:if="${page.hasNext()}">다음</a>
+        <a th:href="@{/emp/emps(p=${page.totalPages - 1})}" th:if="${!page.last}">끝</a>
+    </div>
+
+</body>
+
+</html>

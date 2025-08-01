@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--토큰 생성-->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>LIST</title>
+</head>
+
+<body>
+    <h5>회원 리스트</h5>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>name</th>
+            <th>role</th>
+            <th>상태</th>
+        </tr>
+        <tr th:each="user:${page.content}">
+            <td><a th:text="${user.username}"></a></td>
+            <td th:text="${user.name}"></td>
+            <td class="role" th:text="${user.role}" th:data-target="${user.username}"></td>
+            <td th:text="${user.enabled} == 'T'?'활동중':'휴면' "></td>
+        </tr>
+    </table>
+    <div class="page">
+
+        <a th:href="@{/emp/emps(p=0)}" th:if="${!page.first}">처음</a>
+        <a th:href="@{/emp/emps(p=${page.number - 1})}" th:if="${page.hasPrevious()}">이전</a>
+
+
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+            <a th:href="@{/emp/emps(p=${i})}" th:text="${i + 1}"
+                th:classappend="${i == page.number} ? 'active' : ''">페이지</a>
+        </span>
+
+        <a th:href="@{/emp/emps(p=${page.number + 1})}" th:if="${page.hasNext()}">다음</a>
+        <a th:href="@{/emp/emps(p=${page.totalPages - 1})}" th:if="${!page.last}">끝</a>
+    </div>
+    <script>
+        let r_array = ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_MEMBER'];
+
+        function createFormInsideRole(element) {
+            if (element.querySelector('form')) return; // 중복 방지
+
+            const form = document.createElement('form');
+            form.setAttribute("action", "/admin/update")
+            form.setAttribute("method", "post")
+
+            // select
+            const select = document.createElement('select');
+            select.name = 'role';
+            r_array.forEach(r => {
+                const option = document.createElement('option');
+                option.value = r;
+                option.textContent = r;
+                select.appendChild(option);
+            });
+
+            // input
+            const input1 = document.createElement('input');
+            input1.type = 'hidden';
+            input1.name = 'username';
+            input1.value = element.getAttribute("data-target"); // ID
+
+            const input2 = document.createElement('input');
+            input2.type = 'hidden';
+            input2.name = '_method';
+            input2.value = 'patch';
+            // submit
+            const submit = document.createElement('button');
+            submit.type = 'submit';
+            submit.textContent = '제출';
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_csrf';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            // 조립
+            form.appendChild(select);
+            form.appendChild(input1);
+            form.appendChild(input2);
+            form.appendChild(submit);
+
+            element.appendChild(form);
+            setTimeout(() => {
+                document.addEventListener('click', outsideClickListener);
+            });
+
+            function outsideClickListener(e) {
+                if (!element.contains(e.target)) {
+                    element.removeChild(form);
+                    document.removeEventListener('click', outsideClickListener);
+                }
+            }
+        }
+
+
+        document.querySelectorAll('.role').forEach(el => {
+            el.addEventListener('click', () => createFormInsideRole(el));
+        });
+
+    </script>
+</body>
+
+</html>

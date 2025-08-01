@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>글 상세 보기</title>
+</head>
+
+<body>
+    <!-- question -->
+    <table border="1">
+        <tr>
+            <td>제목</td>
+            <td th:text="${question.title}"></td>
+            <td>작성일</td>
+                <td th:text="${#temporals.format(question.createdAt, 'yy.MM.dd')}"></td>
+        </tr>
+        <tr>
+            <td>내용</td>
+            <td colspan="3">[(${question.content})]</td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <span th:if="${#authentication.name} == ${question.author.username}">
+                    <input type="button" value="수정" th:onclick="'location.href=\'/api/auth/form/update/'+${question.qno} +'\''">
+                    <input type="button" value="삭제" th:onclick="'location.href=\'/api/auth/questions/delete/'+${question.qno} +'\''" >
+                </span>
+                <span>
+                    <input type="button" value="목록" onclick="location.href='/api/questions'" />
+                </span>
+            </td>
+        </tr>
+
+    </table>
+    <br>
+    <hr><br>
+
+    <div>
+        <h3>답변 목록</h3>
+        <ul style="list-style: none;" id="answerList">
+            <li th:each="answer: ${question.answerList}">
+                <div th:data-ano="${answer.ano}">
+                    <span th:text="${answer.content}"></span>
+                    <span th:text="${answer.author.username}"></span>
+                    <span th:if="${#authentication.name} == ${answer.author.username}">
+                        <!-- <input type="button" value="수정" onclick="alert('답 수정')" /> -->
+                        <input type="button" value="삭제" th:onclick="'deleteAnswer(' + ${answer.ano} + ')'" />
+                    </span>
+                    <hr>
+                </div>
+
+            </li>
+
+        </ul>
+        <hr>
+        <form name="answer">
+            <textarea cols="1000" rows="3" name="content" id="content"></textarea>
+            <input type="button" value="답변 작성" onclick="submitAnswer()">
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script th:inline="javascript">
+        const csrfToken = /*[[${_csrf.token}]]*/ '';
+        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+        const questionId = [[${ question.qno }]];
+        const username = [[${#authentication.name}]];
+    </script>
+    <script>
+        function submitAnswer() {
+
+            const content = document.getElementById("content").value;
+
+            if (!content.trim()) {
+                alert("내용을 입력하세요.");
+                return;
+            }
+            if (username == 'anonymousUser' ||username == '' ||username == null) {
+                alert("로그인하세요");
+                return;
+            }
+
+            axios.post('/api/answers', {
+                content: content,
+                questionId: questionId
+            }, {
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+                .then(response => {
+                    location.reload();
+                    })
+                .catch(error => {
+                    console.error("등록 실패", error);
+                });
+        }
+        //글 수정 function
+        function updateAnswer(ano) { }
+        //글 삭제 function
+        function deleteAnswer(ano) {
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            axios.delete('/api/answers', {
+                params: { answerid: ano },
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+                .then(response => {
+                    alert("삭제되었습니다.");
+                    // 해당 답변 div 제거
+                    const answerDiv = document.querySelector('[data-ano="' + ano + '"]');
+                    if (answerDiv) answerDiv.remove();
+                })
+                .catch(error => {
+                    console.error("삭제 실패", error);
+                    alert("삭제 중 오류가 발생했습니다.");
+                });
+        }
+
+    </script>
+
+</body>
+
+</html>
