@@ -1,0 +1,14 @@
+VSCODE 설치
+https://code.visualstudio.com/
+
+
+VSCODE Library 설치
+korean
+prettier
+material icon
+error lens
+Live Server
+Live preview
+
+
+

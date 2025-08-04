@@ -1,0 +1,194 @@
+Spring - 컨테이너
+DI, AOP
+
+web
+MVC
+
+JPA
+Entity, Repository, 영속성 ,CSRF 토큰
+
+Security
+인증, 권한 (설정파일 위주로 정리)
+
+Spring의 개념, 구조
+
+
+-----
+
+
+node.js -> 생략
+- 서버 사이드 JavaScript 런타임 환경
+- 브라우저가 아닌 환경에서도 JavaScript를 실행하게 해줌.
+(JavaScript로 백엔드 개발 가능 : 프론트와 백을 모두 JS로 작성할 수 있어 생산성 향상)
+npm(Node Package Manager) : 오픈 소스 패키지 제공
+
+react (프로젝트 명 react로 하면 잘 안될 수 있음)
+프론트 엔드 개발에서 매우 널리 쓰이는 JavaScript 라이브러리
+컴포넌트 기반의 구조로 빠르고 동적인 웹 애플리케이션 개발
+SPA(Single Pase Application) - 한 페이지에서 컴포넌트만 바꿔가면서(새로고침 없이) 작업
+변경된 부분만 가상 DOM(Virtual DOM)을 통해 효율적으로 업데이트
+
+* 툴 체인 : 리액트를 개발하는데 필요한 환경을 기본적으로 제공하는 도구
+
+프로젝트 생성 도구
+create-react-app     공식 CLI, 구성이 자동화 됨.(단점 : 느림 , 설정 제한)
+Vite                     빠르고 가벼운 번들러, 최신 트렌드, 점점 대세
+
+
+-----
+[create-react-app으로 프로젝트 생성]
+1. node.js 설치(https://nodejs.org/ko/download)
+
+2. VScode 에서 ctrl + j -> cmd prompt 선택(PowerShell은 명령어가 잘 안먹을 때가 있음.)
+
+3. npx create-react-app my-app     toolchain 중에서 create-react-app를 설치 (my-app이라는 곳에)
+y     (y(동의) 누르고 엔터)
+cd my-app     my-app 프로젝트로 이동
+npm start     개발용 서버 시작
+ctrl + c     개발용 서버 종료
+
+*npm start : Starts the development server.
+*npm run build : Bundles the app into static files for production.
+
+- public 폴더 (Spring의 static 폴더 같은)
+정적(static)인 파일을 보관하는 곳
+(이미지, 폰트, manifest, favicon 등)
+경로="/public 안의 경로"
+
+
+-----
+[Vite로 프로젝트 생성]
+create-react-app의 1,2 는 동일(이미 했으면 상관없음)
+
+npm create vite@latest
+프로젝트명
+프레임워크 선택(React) - 방향키로 선택
+언어 - JavaScript
+
+폴더 (프로젝트) 이동 후
+npm i     npm 생성
+npm run dev     서버 시작
+h + Enter     도움말
+o + Enter     브라우저 오픈
+q + Enter(ctrl + c)     서버 종료
+
+
+-----
+
+jsx 확장자
+- JavaScript XML
+- js 코드안에 html 태그를 하용하는 jsx 문법
+- 컴포넌트 태그 사용시 함수 호출로 변경되서 수행
+
+* 컴포넌트(사용자 정의 태그)
+서로 연관된 코드들을 묶고 이름을 붙여서 단순한 태그로 만듬
+-> 사용자 정의 태그(첫 글자 대문자)
+사용자 정의 태그를 부품처럼 사용하자
+-> 결국 그냥 React에서 쓰는 사용자 정의 함수 같은거(UI관련).
+
+- 컴포넌트 함수 선언(첫글자 대문자)
+const 함수명=()=>{
+//로직
+return (보내질 태그);
+}
+
+- 컴포넌트 태그 호출
+<함수명 /> or <함수명 > </함수명 >
+
+
+- 컴포넌트 태그 - 속성 지정 가능
+지정한 속성 값을 함수에서 받아서 사용할 수 있음.
+
+
+
+-----
+
+JSX 문법 정리
+컴포넌트 함수 return( html 처럼보이지만 JS 코드안에서 xml 문법 사용 );
+
+1. 반드시 하나의 부모요소로 감싸야함
+ex) 
+return(
+<div>
+     <h1>Title</h1>
+     <p>Content</p>
+</div>
+);
+
+2. { }를 이용해 js코드 삽입 가능
+변수, 함수 호출, 삼항연산자 등 표현식만 가능
+조건(if), 반복문(for)은 JSX 밖에서 사용
+
+ex)
+let name="kim";
+return(<h1> Hello, {name}</h1>);
+
+function Login(state){
+     return(
+	<p> {state ? "로그인 성공" : "로그인 실패"}</p>
+	);
+}
+
+반복 : map()
+* 배열을 렌더링 할때는 key속성이 필수
+function list( {todos} ){
+     return (
+	<ul>
+	{todos.map((todo, index)=>
+	     <li key={index}>{todo}</li>} ) 
+	</ul>
+     );
+}
+
+3. 태그의 속성은 카멜 표기법 사용
+아예 속성명이 바뀌는 것도 있음.
+ex)
+return(
+<div>
+     <h1 onClick={함수명}>Title</h1>
+     <p className="클래스명">Content</p>
+</div>
+);
+
+class-> className
+onclick -> onClick
+<label for -> htmlFor
+
+4. 주석
+외부 :  //  ,  /*  */
+내부 : 
+return (
+{/* JSX안에서의 주석 */}
+);
+
+
+-----
+[React 설정]
+//cf. React 설정.txt
+
+불필요한 파일 삭제하기
+Public폴더에 있는 파일 모두 삭제 (안쓰면 생략)
+assets 폴더에 react.svg 삭제 (안쓰면 생략)
+App.jsx에 import Error삭제  (import './App.css' 제외 삭제)
+App.css / index.css 안에 내용만 삭제
+
+.eslintrc.cjs의 rules(룰스)  점검 코드 추가
+ "no-unused-vars":"off", - 사용하지 않는 변수 체크 안함
+ "react/prop-types":"off", - 안전한 react 사용 점검 안함
+(,까지 복사)
+
+-----
+[Vscode 설정]
+//cf. vscode_설정.txt
+VSCODE 설치
+https://code.visualstudio.com/
+
+
+VSCODE Library 설치
+korean
+prettier
+material icon
+error lens
+Live Server
+Live preview
+
