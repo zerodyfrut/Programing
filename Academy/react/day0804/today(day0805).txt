@@ -1,0 +1,68 @@
+[이벤트 처리]
+
+1. 이벤트 핸들러 : 카멜 표기법
+2. 함수 지정
+
+- onClick={함수명}  // 함수 매개변수 없을 때,
+
+- 이벤트 객체 : SyntheticEvent 라는 이벤트 객체 전달
+	       e. target : 이벤트가 발생한 요소
+
+- onClick={()=>함수명(매개변수)}) // 매개 변수가 있을 때,
+  onClick={() => onClickButton2('김솔데')} 
+  onClick={onClickButton2('김솔데')}  // 이렇게 하면 이벤트 발생하지 않아도 함수가 즉시 실행됨
+
+- submit 이벤트 발생 시
+  on submit ={onSubmitForm}
+
+      const onSubmitForm=(e)=>{
+          e.prevnetDefault(); // 액션 지정 페이지 이동 막기(form에서 submit 막기)
+      }
+
+
+- state(상태)
+: 컴포넌트를 동적으로 만드는 값
+: 동적인 데이터를 저장하고 관리하는 변수
+: 값이 변화하면 자동으로 리렌더링 적용!
+
+const [변수, set변수명] = useState(초기값) // 초기값 미지정시, undefined
+     변수 : 상태값
+     set변수명 : 변수에 저장된 값을 변경 -> 자동 리렌더링
+
+
+- 리랜더링 되는 경우
+1. state 변화
+2. props 변화
+3. 부모 컴포넌트의 변화
+
+
+- Hook
+:함수형 컴포넌트에서 상태(state)나 lifecycle을 사용할 수 있게 해주는 함수
+
+- 대표적인 hook
+1. useState : 컴포넌트 상태를 선언할 때 사용
+2. useEffect : 부수 효과(side effect)를 처리할 때 사용(렌더링 이후 코드실행 등)
+	  컴포넌트가 렌더링 될 때마다 특정작업(사이드 이펙트)를 실행
+3. useRef : DOM 접근 또는 값 저장용 변수로 사용
+	리렌더링 없이 값 유지가 필요한 변수
+
+- Hook 사용 규칙
+ .최상위에서만 호출
+ .조건문, 반복문, 함수 내부에서 호출하면 안됨.
+ .항상 컴포넌트의 최상단에서 사용해야함.
+ .React 함수형 컴포넌트 혹은 Custom Hook에서만 호출 가능
+ .일반 함수나 클래스에서는 사용 불가.
+
+
+filter(반복함수) - 배열의 요소를 하나씩 꺼내서 콜백함수 수행 후 
+	         return 값이 true인 요소들만 남겨 새로운 배열로 생성
+배열.filter((요소, 인덱스, 배열)->{조건식(t/f)})  //JS는 매개변수 숫자가 달라도 돌아감
+
+let oarray=[1,2,3,4];
+let narray=oarray.filter((e,i)=>{e%2==0});
+	=>[2,4]
+
+people=["a","b","c"];  editIndex=1 (삭제할 인덱스)
+people.filter((e, i) => i !== editIndex);
+=>["a","c"]
+
