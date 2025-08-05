@@ -1,0 +1,143 @@
+[08.04] react 1
+
+node.js
+- 서버 사이드 JavaScript 런타임 환경
+- 브라우저가 아닌 환경에서도 JavaScript를 실행하게 해줌
+(JavaScript로 백엔드 개발 가능: 
+프론트와 백을 모두 JS로 작성할 수 있어 생산성 향상)
+npm(Node Package Manager) : 오픈 소스 패키지 제공
+
+React
+프론트엔드 개발에서 매우 널리 쓰이는 JavaScript 라이브러리
+컴포넌트 기반의 구조로 빠르고 동적인 웹 애플리케이션 개발
+SPA(Single Page Application)
+변경된 부분만 가상 DOM(Virtual DOM)을 통해 효율적으로 업데이트
+
+*툴 체인 : 리액트를 개발하는데 필요한 환경을 기본적으로 제공하는 도구
+
+프로젝트 생성 도구
+create-react-app	공식 CLI, 구성이 자동화됨 (단점: 느림, 설정 제한)
+Vite				빠르고 가벼운 번들러, 최신 트렌드. 점점 대세
+
+
+[create-react-app로 프로젝트 생성]
+1. node.js 설치
+2. VScode에서 ctrl+ j -> cmd prompt 선택
+npx create-react-app my-app
+y
+cd my-app
+npm start
+
+*npm start: Starts the development server.
+*npm run build: Bundles the app into static files for production.
+
+-public 폴더 
+정적(static)인 파일을 보관하는 곳
+이미지, 폰트, manifest, favicon등 
+경로="/public 안의 경로"
+
+[Vite로 프로젝트 생성]
+
+npm create vite@latest
+프로젝트명
+프레임워크 선택(React) - 방향키로 선택
+언어 - JavaScript
+
+폴더(프로젝트)이동 후
+npm i
+npm run dev
+h + 엔터
+o + 엔터(브라우저 오픈)
+q + 엔터(서버 종료)
+
+jsx 확장자 
+- Java Script XML
+- js 코드 안에 html태그를 사용하는 jsx문법
+- 컴포넌트 태그 사용시 함수 호출로 변경되서 수행
+
+
+* 컴포넌트
+
+서로 연관된 코드들을 묶고 이름을 붙여서 단순한 태그로 만듬
+-> 사용자 정의 태그(첫글자 대문자)
+사용자 정의 태그를 부품처럼 사용하자!
+
+사용자 정의 태그를 컴포넌트라고 부른다.
+
+*컴포넌트 함수 선언(첫글자 대문자)
+const 함수명 = () => {
+//로직 수행 
+return (보내질 태그);
+}
+
+*컴포넌트 태그 호출
+<함수명 /> or <함수명> </함수명>
+	
+
+
+JSX 문법 정리
+컴포넌트 함수 return(html처럼 보이지만 js코드 안에서 xml문법 사용 );
+
+1. 반드시 하나의 부모 요소로 감싸야함
+return (
+	<div>
+		<h1>Title</h1>
+		<p>Content</p>
+	</div>
+); 
+
+2. {}를 이용해 js 코드 삽입 가능
+변수, 함수 호출, 삼항연산자 등 표현식만 가능
+(조건(if), 반복문(for)는 JSX밖에서 사용)
+
+let name="kim";
+return (<h1> Hello, {name} </h1>);
+
+function Login(state){
+	return (
+		<p>{state ? "로그인 성공" : "로그인 실패"} </p>
+	);
+}
+반복 : map()
+*배열을 렌더링할때는 key속성 필수
+function list({todos}){
+	return (
+		<ul>
+		{todos.map((todo, index)=>{
+			<li key={index}> {todo}</li>})}
+		</ul>
+	);
+}
+
+3.태그의 속성은 카멜 표시법 사용
+
+return (
+	<div>
+		<h1 onClick={함수명}>Title</h1>
+		<p className="클래스명" id="cotnent">Content</p>
+	</div>
+); 
+onclick -> onClick
+class -> className
+<label for  -> htmlFor
+
+4. 주석
+바깥 // /*  */
+return( 
+	{/* JSX안에서는 이렇게 주석 처리 */}
+);
+
+*컴포넌트 태그 -> 함수 호출
+컴포넌트 태그 - 속성 지정 가능
+
+지정한 속성 값을 함수에서 받아서 사용할 수 있음
+
+매개변수
+(props) : 변수 한개 선언시 모든 속성값을 한번에 받는다.
+		{props.속성명}
+
+{속성명, 속성명, 속성명="기본값"} : 이름에 맞게 저장
+
+{속성명, 속성명,children } : 이름에 맞게 저장,
+					children은 자식 위치에 선언한  
+					컴포넌트 태그, 문자열, 배열등을 받아온다. 
