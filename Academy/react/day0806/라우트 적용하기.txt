@@ -1,0 +1,104 @@
+react 프로젝트 생성
+
+프로젝트>npm i
+프로젝트>npm i react-router-dom
+
+[components/Header.jsx]
+
+import React from 'react';
+
+function Header(props) {
+    return (
+		<>
+			<h1>헤더입니다.</h1>
+		</>
+    );
+}
+
+export default Header;
+
+[components/Main.jsx]
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Main = (props) => {
+	return (
+		<>
+				<h3>안녕하세요. 메인페이지 입니다.</h3>
+			<ul>
+				<Link to="/product/1"><li>1번상품</li></Link>
+				<Link to="/product/2"><li>2번상품</li></Link>
+			</ul>
+		</>
+	);
+};
+
+export default Main;
+
+[components/Product.jsx]
+import React from 'react';
+import { useParams } from 'react-router-dom';
+
+const Product = (props) => {
+    const { productId } = useParams();
+    return (
+        <>
+            <h3>{ productId }번 상품 페이지입니다.</h3>
+            <ul>
+                <li>hash : {location.hash}</li>
+                <li>pathname : {location.pathname}</li>
+                <li>search : {location.search}</li>
+                <li>state : {location.state}</li>
+                <li>key : {location.key}</li>
+            </ul>
+        </>
+    );
+}
+
+export default Product;
+
+
+[components/NotFound.jsx]
+import React from 'react';
+
+function NotFound(props) {
+    return (
+        <>
+            <h1>잘못된 요청.</h1>
+            <p>404Error</p>
+        </>
+    );
+}
+
+export default NotFound;
+
+
+[App.jsx]
+import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Main from './components/Main';
+import Product from './components/Product';
+import NotFound from './components/NotFound';
+import './App.css'
+
+function App() {
+
+  return (
+    <div className='App'>
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Main />}></Route>
+        <Route path="/product/:productId" element={<Product />}></Route>
+        {/* 상단에 위치하는 라우트들의 규칙을 모두 확인, 일치하는 라우트가 없는경우 처리 */}
+        <Route path="*" element={<NotFound />}></Route>
+      </Routes>
+    </BrowserRouter>
+  </div>
+  )
+}
+
+export default App  
+
