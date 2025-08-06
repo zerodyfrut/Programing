@@ -1,0 +1,219 @@
+Spring Boot + React 기반의 단일 채팅방 애플리케이션
+
+
+[Back - end Spring Boot 서버]
+
+[build.gradle] - 프로젝트 만들때 적용할 것(혹시나 못 넣었을때는 붙여 넣기)
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+
+*모든 클래스는 기본 패키지에 만들기(혹은 하위 패키지)
+[WebSocketConfig.java]
+
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/topic"); // 클라이언트에게 브로드캐스트
+        config.setApplicationDestinationPrefixes("/app"); // 클라이언트 전송 prefix
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws-chat")
+                .setAllowedOriginPatterns("*")
+                .withSockJS(); // fallback 지원
+    }
+}
+
+[ChatMessage.java]
+
+@Data
+public class ChatMessage {
+    private MessageType type;
+    private String sender;
+    private String content;
+    private LocalDateTime timestamp;
+
+    public enum MessageType {
+        CHAT, JOIN, LEAVE
+    }
+
+    public ChatMessage() {
+        this.timestamp = LocalDateTime.now();
+    }
+}
+
+
+[ChatController.java]
+
+@Controller
+public class ChatController {
+
+    @MessageMapping("/chat.send")
+    @SendTo("/topic/public")
+    public ChatMessage sendMessage(ChatMessage message) {
+        message.setTimestamp(LocalDateTime.now());
+        return message;
+    }
+
+    @MessageMapping("/chat.newUser")
+    @SendTo("/topic/public")
+    public ChatMessage newUser(ChatMessage message) {
+        message.setTimestamp(LocalDateTime.now());
+        message.setType(ChatMessage.MessageType.JOIN);
+        return message;
+    }
+}
+
+
+----로컬 서버 주소: http://localhost:8080/ws-chat------------------
+
+
+[front end - React 클라이언트]
+
+[패키지 추가 설치]
+npm install @stomp/stompjs sockjs-client dayjs
+
+
+[src/components/ChatApp.jsx]
+
+import React, { useEffect, useState, useRef } from 'react';
+import SockJS from 'sockjs-client';
+import { CompatClient, Stomp } from '@stomp/stompjs';
+import dayjs from 'dayjs';
+
+const ChatApp = () => {
+  const [messages, setMessages] = useState([]);
+  const [username, setUsername] = useState('');
+  const [connected, setConnected] = useState(false);
+  const [input, setInput] = useState('');
+  const stompClient = useRef(null);
+
+  useEffect(() => {
+    //connect();
+    return () => disconnect();
+  }, []);
+
+  const connect = () => {
+    const socket = new SockJS('http://localhost:8080/ws-chat');
+    stompClient.current = Stomp.over(socket);
+
+    stompClient.current.connect({}, () => {
+      setConnected(true);
+
+      stompClient.current.subscribe('/topic/public', (message) => {
+        const data = JSON.parse(message.body);
+        setMessages((prev) => [...prev, data]);
+      });
+
+      stompClient.current.send('/app/chat.newUser', {}, JSON.stringify({
+        sender: username || 'Anonymous',
+        type: 'JOIN'
+      }));
+    });
+  };
+
+  const disconnect = () => {
+    if (stompClient.current) {
+      stompClient.current.disconnect();
+      setConnected(false);
+    }
+  };
+
+  const sendMessage = () => {
+    if (stompClient.current && input.trim()) {
+      stompClient.current.send('/app/chat.send', {}, JSON.stringify({
+        sender: username || 'Anonymous',
+        content: input,
+        type: 'CHAT'
+      }));
+      setInput('');
+    }
+  };
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>💬 실시간 채팅</h2>
+
+      {!connected && (
+        <div>
+          <input
+            type="text"
+            placeholder="사용자명 입력"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <button onClick={connect}>접속하기</button>
+        </div>
+      )}
+
+      {connected && (
+        <>
+          <div style={{ maxHeight: 300, overflowY: 'scroll', border: '1px solid gray', marginBottom: 10 }}>
+            {messages.map((msg, idx) => (
+              <div key={idx}>
+                <span style={{ color: msg.type === 'JOIN' ? 'green' : 'black' }}>
+                  {msg.sender}:
+                </span> {msg.content || ''} 
+                <small style={{ marginLeft: 10, color: '#888' }}>
+                  {msg.timestamp ? dayjs(msg.timestamp).format('HH:mm:ss') : ''}
+                </small>
+              </div>
+            ))}
+          </div>
+
+          <input
+            type="text"
+            placeholder="메시지를 입력하세요"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+          />
+          <button onClick={sendMessage}>전송</button>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default ChatApp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
