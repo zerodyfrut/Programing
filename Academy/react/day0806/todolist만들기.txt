@@ -1,0 +1,153 @@
+**to do list 만들기**
+
+할 일을 추가하고 삭제할 수 있는 간단한 To-Do List 를 만들어보자
+
+[src > App.css]
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9f9f9;
+}
+
+.App {
+  text-align: center;
+}
+
+.todo-list {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+input[type="text"] {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 60%;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+li button {
+  background-color: #ff4d4d;
+  margin-left: 10px;
+}
+
+li button:hover {
+  background-color: #cc0000;
+}
+
+
+
+[src> components > TodoList.jsx]
+
+import { useState } from 'react';
+
+function TodoList() {
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState('');
+
+  const handleInputChange = (e) => {
+    setNewTodo(e.target.value);
+  };
+
+  const handleAddTodo = () => {
+    if (newTodo.trim() !== '') {
+      setTodos([...todos, newTodo]);
+      setNewTodo('');
+    }
+  };
+
+  const handleDeleteTodo = (index) => {
+    const newTodos = todos.filter((_, i) => i !== index);
+    setTodos(newTodos);
+  };
+
+  return (
+    <div className="todo-list">
+      <h1>To-Do List</h1>
+      <input
+        type="text"
+        value={newTodo}
+        onChange={handleInputChange}
+        placeholder="Add a new task"
+      />
+      <button onClick={handleAddTodo}>Add</button>
+      <ul>
+        {todos.map((todo, index) => (
+          <li key={index}>
+            {todo}
+            <button onClick={() => handleDeleteTodo(index)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default TodoList;
+
+
+[App.jsx]
+
+
+import './App.css';
+import TodoList from './components/TodoList';
+
+function App() {
+  return (
+    <div className="App">
+      <TodoList />
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+
+
+
+
+
