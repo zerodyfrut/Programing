@@ -1,0 +1,45 @@
+[Web Socket]
+클라이언트와 서버 양방향, 실시간 통신을 하는 프로토콜
+
+
+클라이언트		서버
+1.     HTTP      ->      websocket 요청     
+2.                 <-       websocket 연결수락
+3.     실시간 양방향 데이터 통신 시작
+4. 	연결종료
+
+1. 요청 헤더에 WebSocket 관련 정보를 담아서 서버로 보냄.
+2. WebSoket 프로토콜로 전환(https:// -> ws://)
+   연결상태가 유지
+   (이전에 WebSoket 을 사용하지 않을 때는 클라이언트가 요청하고 서버가 실행하고 바로 연결이 끊김)
+3. stomp(simple text oriented messaging protocol) : 메세지 라우팅
+   을 소켓 위에 얹어서 메세지 처리
+
+* spring
+   @MessageMapping("/chat.send") //클라이언트로부터 들어오는 메세지 처리
+   @SendTo("/topic/public) //구독중인 모든 클라이언트에게 메세지 전달
+   Method
+
+* react
+   stompClient.current.send() // 메세지 전송
+   stompClient.current.subscribe('구독 주소', message) // 구독
+
+
+websocket 연결 요청 주소 : /ws-chat
+클라이언트가 구독할 주소 prefix(접두어) : "/topic"  (사용자 정의)
+클라이언트가 서버로 보낼 메세지 주소 prefix(접두어) : "/app"   (사용자 정의)
+ ex) /app/chat.send : @MessageMapping("chat.send") 호출
+
+
+-----
+채팅메세지를 DB에 저장하기
+
+*sender, content, timestamp
+
+*application.properties
+*entity class
+*repository interface
+*controller class
+
+엔티티는 기본생성자가 있어야함.
+->레포지토리에서 select시 기본생성자로 엔티티를 만들것이기 때문.
