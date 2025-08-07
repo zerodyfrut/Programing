@@ -8,11 +8,11 @@ Spring Boot + React 기반의 단일 채팅방 애플리케이션
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    JPA
+    MYSQL
+    devTools
 }
 
 
@@ -31,8 +31,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns("*")
-                .withSockJS(); // fallback 지원
+                .setAllowedOriginPatterns("*")  // 어떤 도메인이든 허용
+                .withSockJS(); // fallback 지원  //브라우저가 웹소켓을 지원하지 않을 경우 대체
     }
 }
 
@@ -82,7 +82,7 @@ public class ChatController {
 
 [front end - React 클라이언트]
 
-[패키지 추가 설치]
+[패키지 추가 설치(총 3가지 패키지 : stomp/stompjs,  sockjs-client,  dayjs)]
 npm install @stomp/stompjs sockjs-client dayjs
 
 
