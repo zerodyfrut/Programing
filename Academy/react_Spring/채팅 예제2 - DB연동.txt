@@ -1,0 +1,116 @@
+*채팅 메세지를 DB에 저장해보자
+
+* sender, content, timestamp
+
+** application.properties **
+
+# DataSource Setting(mysql)
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/데이터베이스명
+spring.datasource.username=계정
+spring.datasource.password=비번
+# JPA
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.show_sql=true
+
+
+** entity class **
+
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Entity
+@Getter @Setter @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ChatMessage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String sender;
+
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    private LocalDateTime timestamp;
+    
+    @Enumerated(EnumType.STRING)	
+    MessageType type;
+    
+    public enum MessageType {
+        CHAT, JOIN, LEAVE
+    }		
+	
+}
+
+
+** repository interface **
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+}
+
+
+
+
+**DTO클래스**  (DTO클래스 추가함)
+import lombok.*;
+
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChatMessageDto {
+    private String sender;
+    private String content;
+}
+
+
+** controller class **
+
+@Controller
+public class ChatController {
+
+    @MessageMapping("/chat.newUser")
+    @SendTo("/topic/public")
+    public ChatMessage newUser(ChatMessage message) {
+        message.setTimestamp(LocalDateTime.now());
+        message.setType(ChatMessage.MessageType.JOIN);
+        return message;
+    }
+
+    @Autowired
+    SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    ChatMessageRepository chatMessageRepository;
+
+    @MessageMapping("/chat.send")
+    public void receiveMessage(ChatMessageDto messageDto) {
+        // DB 저장
+        ChatMessage saved = chatMessageRepository.save(ChatMessage.builder()
+                .sender(messageDto.getSender())
+                .content(messageDto.getContent())
+                .timestamp(LocalDateTime.now())
+                .build());
+        // 구독자에게 전송
+        messagingTemplate.convertAndSend("/topic/public", saved);
+    }
+}
