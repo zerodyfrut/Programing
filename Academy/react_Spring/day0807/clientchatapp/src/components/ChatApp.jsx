@@ -5,7 +5,7 @@ import { CompatClient, Stomp } from '@stomp/stompjs';
 import React, { useState, useRef, useEffect } from "react";
 
 const ChatApp = () => {
-
+    // 변수 선언
     const [messages, setMessages] = useState([]);
     const [username, setUsername] = useState('');
     const [connected, setConnected] = useState(false);
@@ -14,6 +14,7 @@ const ChatApp = () => {
     const focus1 = useRef("");
     const focus2 = useRef("");
 
+    // 종료시 적용
     useEffect(() => {
         return () => disconnect();
     }, [])
@@ -22,15 +23,18 @@ const ChatApp = () => {
         const socket = new SockJS('http://localhost:8080/ws-chat');
         stompClient.current = Stomp.over(socket);
 
-        stompClient.current.connect({}, () => {  //?
+        stompClient.current.connect({}, () => {  //{}안에는 헤더
             setConnected(true);
 
-                stompClient.current.subscribe('/topic/public', (message) => {//scribe 등등 
+                stompClient.current.subscribe('/topic/public', (message) => {//scribe 등등
+                // 해당 주소 및 매개변수(메세지)
                 const data = JSON.parse(message.body);
+                // 메세지 내용을 JSON화? 해서 data에 삽입
                 setMessages((prev) => [...prev, data]);
+                // Message에 data값 추가
             });
 
-            stompClient.current.send('/app/chat.newUser', {}, JSON.stringify({//?
+            stompClient.current.send('/app/chat.newUser', {}, JSON.stringify({//
                 sender: username || 'Anonymous',
                 type: 'JOIN'
             }));
@@ -77,8 +81,10 @@ const ChatApp = () => {
                         placeholder="사용자명"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        // 여기서 username에 값을 넣고,
                     />
                     <button onClick={connect}>접속</button>
+                    {/* connect수행 */}
                 </div>
             )}
 
