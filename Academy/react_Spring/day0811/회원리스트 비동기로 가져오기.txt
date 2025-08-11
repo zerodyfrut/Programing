@@ -1,0 +1,125 @@
+react-router-dom인스톨 후
+
+서버 -> get방식 요청 받아 모든 레코드 리턴하는 getAllMembers() 선언
+
+클라이언트 -> "/"요청시 MemberForm출력
+  	"/members"요청시 MemberList 출력
+
+MemberList
+ > 처음 렌더링시
+axios.get()로 모든 레코드 받아와서 state에 저장
+저장된 데이터 출력(이미지도 포함)			
+
+
+[컨트롤러 추가]
+
+@GetMapping
+    public List<Member> getAllMembers() {
+        return memberRepository.findAll();
+    }
+
+
+[MemberList.jsx]
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+export default function MemberList() {
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const res = await axios.get('http://localhost:8080/api/members');
+        setMembers(res.data);
+      } catch (err) {
+        setError('회원 목록을 불러오는 데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMembers();
+  }, []);
+
+  if (loading) return <p>로딩 중...</p>;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+
+  return (
+    <div>
+      <h2>회원 목록</h2>
+      {members.length === 0 ? (
+        <p>등록된 회원이 없습니다.</p>
+      ) : (
+        <ul>
+          {members.map((member) => (
+            <li key={member.idNo}>
+              {member.name} ({member.id}) - {member.role} <br />
+              전화: {member.phone} <br />
+              주소: {member.address} <br />
+              {member.image && (
+                <img
+                  src={`http://localhost:8080${member.image}`}
+                  alt={member.name}
+                  style={{ width: 100, height: 100, objectFit: 'cover', marginTop: 8 }}
+                />
+              )}
+              <hr />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+
+[App.jsx]
+
+import './App.css'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import MemberForm from './components/MemberForm';
+import MemberList from './components/MemberList';
+//npm i react-router-dom
+function App() {
+  return (
+      
+      <div style={{ padding: '20px' }}>
+        <nav>
+          <Link to="/" style={{ marginRight: '10px' }}>회원 등록</Link>
+          <Link to="/members">회원 목록</Link>
+        </nav>
+
+        <hr />
+
+        <Routes>
+          <Route path="/" element={<MemberForm />} />
+          <Route path="/members" element={<MemberList  />} />
+        </Routes>
+      </div>
+    
+  )
+}
+
+export default App
+
+
+[main.jsx]
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { BrowserRouter } from 'react-router-dom'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <BrowserRouter> 
+    <App />
+    </BrowserRouter>
+  </StrictMode>,
+)
+
+ 
+
