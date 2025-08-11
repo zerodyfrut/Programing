@@ -11,6 +11,7 @@ const TodoItem = ({ id, text, done, createdDate, priority, onToggle, onDelete })
       >
         {text}
       </span>
+      {/* [문자열이 들어있는 배열][인덱스 번호] */}
       <span>({["높음", "중간", "낮음"][priority - 1]})</span>
       <span style={{ marginLeft: "10px", color: "gray" }}>
         {new Date(createdDate).toLocaleString()}

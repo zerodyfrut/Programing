@@ -3,6 +3,8 @@ import TodoEditor from "./components/TodoEditor";
 import TodoList from "./components/TodoList";
 
 const STORAGE_KEY = "todo_data";
+// 배열이나 객체는 안에 저장된걸 바꿀수 있으나,
+// 문자열 등 고정된 건 바꾸지 못함.
 
 const reducer = (state, action) => {
   // state(todos값을 가리킴)
