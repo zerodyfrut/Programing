@@ -1,0 +1,137 @@
+<Outlet /> : 조금 더 간단하게 layout을 작성해보자
+	*각 페이지 컴포넌트가 보여져야하는 부분에 Outlet 컴포넌트를 넣는다.
+	Outlet영역에 각 Route들에 매칭 시켜놓은 element들이 랜더링되어 나타난다.	
+
+
+cmd> npm i react-router-dom
+        npm i moment
+
+
+[src/site/gallery/gallery.jsx]
+
+import React from "react";
+
+const Gallery = () => {
+    return (
+        <>
+            <h3>
+                갤러리
+            </h3>
+        </>
+    );
+};
+
+export default Gallery;
+
+[src/site/home/home.jsx]
+
+import React from "react";
+
+const Home = () => {
+    return (
+        <>
+            <h3>홈</h3>
+        
+        </>
+    );
+};
+
+export default Home;
+
+
+[src/site/notice/notice.jsx]
+
+import React from "react";
+//marquee: 텍스트를 좌우상하로 움직이는 태그
+const Notice = () => {
+    return (
+        <>
+            <marquee>공지사항1</marquee>
+            <marquee>공지사항2</marquee>
+        
+        </>
+    );
+};
+
+export default Notice;
+
+[src/site/siteLayout.jsx]
+import React from "react";
+import { Link, Outlet } from "react-router-dom";
+import moment from 'moment';
+
+const SiteLayout = () => {
+    const date = new Date();
+    const formattedDate = moment(date).format('MMM DD');
+    
+    return (
+        <table
+            style={{ width: 1200, marginLeft: "auto", marginRight: "auto" }}
+            border={1}
+        >
+            <tr>
+                <td>
+                    <h1>{formattedDate}</h1>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <Link to="/">홈</Link>&nbsp;&nbsp;
+                    <Link to="/gallery.go">갤러리</Link>&nbsp;&nbsp;
+                    <Link to="/notice.go">공지사항</Link>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <Outlet />
+                </td>
+            </tr>
+        </table>
+    );
+};
+
+export default SiteLayout;
+
+[App.jsx]
+
+import "./App.css";
+import Gallery from "./site/gallery/gallery";
+import Home from "./site/home/home";
+import Notice from "./site/notice/notice";
+import SiteLayout from "./site/siteLayout";
+import { Route, Routes } from "react-router-dom";
+
+
+function App() {
+    return (
+        <Routes>
+            <Route element={<SiteLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/gallery.go" element={<Gallery />} />
+                <Route path="/notice.go" element={<Notice />} />
+            </Route>
+        </Routes>
+    );
+}
+
+export default App;
+
+
+[main.jsx]
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { BrowserRouter } from 'react-router-dom'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <BrowserRouter>
+    <App />
+    </BrowserRouter>
+  </StrictMode>,
+)
+
+
+
