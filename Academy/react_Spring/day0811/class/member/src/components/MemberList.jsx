@@ -37,19 +37,18 @@ export default function MemberList() {
         deleteMember();
         setMembers(members.filter((item) => item.idNo !== idNo));
     };
+    
     // const onDelete = (idNo) => {
     //     const deleteMember = async () => {
-
     //         try {
     //             setLoading(true);
     //             const res = await axios.delete(`http://localhost:8080/api/members/${idNo}`);
     //         } catch (err) {
-    //             setError("회원 삭제 실패")
+    //             setError("회원 삭제 실패");
     //         } finally {
     //             setLoading(false);
     //         }
     //     };
-
     //     deleteMember();
     //     setMembers(members.filter((item) => item.idNo !== idNo));
     // }
