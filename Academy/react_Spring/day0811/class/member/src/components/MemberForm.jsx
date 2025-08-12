@@ -44,24 +44,23 @@ export default function MemberForm() {
   }
 
 
-    return (
-      <form onSubmit={handleSubmit}>
-        <input placeholder="ID" onChange={e => setForm({ ...form, id: e.target.value })} />
-        <input placeholder="이름" onChange={e => setForm({ ...form, name: e.target.value })} />
-        <input type="file" onChange={e => setImage(e.target.files[0])} accept="image/*" />
-        <input placeholder="전화번호" onChange={e => setForm({ ...form, phone: e.target.value })} />
-        <input value={form.address} placeholder="주소" readOnly />
-        <button type="button" onClick={handleAddressSearch}>주소 검색</button>
-        <select
-          name="role"
-          value={form.role}
-          onChange={e => setForm({ ...form, role: e.target.value })}
-          style={{ marginRight: '0.5rem' }}
-        >
-          <option value="USER">USER</option>
-          <option value="ADMIN">ADMIN</option>
-        </select>
-        <button type="submit">회원가입</button>
-      </form>
-    );
-  }
+  return (
+    <form onSubmit={handleSubmit}>
+      <input placeholder="ID" onChange={e => setForm({ ...form, id: e.target.value })} />
+      <input placeholder="이름" onChange={e => setForm({ ...form, name: e.target.value })} />
+      <input type="file" onChange={e => setImage(e.target.files[0])} accept="image/*" />
+      <input placeholder="전화번호" onChange={e => setForm({ ...form, phone: e.target.value })} />
+      <input value={form.address} placeholder="주소" readOnly />
+      <button type="button" onClick={handleAddressSearch}>주소 검색</button>
+      <select
+        name="role"
+        value={form.role}
+        onChange={e => setForm({ ...form, role: e.target.value })}
+        style={{ marginRight: '0.5rem' }}>
+        <option value="USER">USER</option>
+        <option value="ADMIN">ADMIN</option>
+      </select>
+      <button type="submit">회원가입</button>
+    </form>
+  );
+}
