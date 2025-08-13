@@ -1,0 +1,523 @@
+개발환경 
+db: MySql
+back-end: spring boot, spring data jpa
+front-end: react, react-router-dom, react-redux, axios
+
+주제: 미니 쇼핑몰 구현
+
+요구사항
+1. 상품을 등록할 수 있다
+상품 코드(일련번호), 상품명, 간단한 설명(500자 내외), 상품 이미지를 등록한다.
+이때 상품의 사진은 한개만 가능하다.
+
+2. 상품 리스트를 조회한다.
+이미지, 상품명, 간단한 설명을 리스트로 보여준다.
+이때 한 페이지당 10개씩만 보여준다.
+이미지 클릭시 해당 제품 상세 페이지로 이동한다.
+
+3. 상세 페이지에서는 상품의 내용을 보여주며
+해당 상품에 장바구니 버튼을 클릭시 장바구니에 담긴다.
+이때 장바구니는 redux를 사용한다.
+
+4. 장바구니 링크 클릭시  장바구니에 저장된 상품 리스트를 출력한다.
+
+5. 헤더에는 항상 상품 리스트, 상품 등록, 장바구니 링크를  띄운다
+router의 Outlet을 사용한다
+
+1.DB 구조 -> 엔티티 구현
+2. 레포지토리 
+3. 서버 기능별 컨트롤러 구현
+상품등록
+list조회
+상세 조회
+
+1. 라우팅 구조
+Header
+Outlet
+    /product  -> ProductList.jsx
+    /product/:id -> ProductDetail.jsx     
+    /add-product  -> ProductForm.jsx
+    /cart ->   	-> Cart.jsx
+
+2. Redux slice (store 처리)
+
+3. 컴포넌트 구현
+
+
+
+
+--------------- BACK ---------------
+[build.gradle]
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+
+[application.properties]
+spring.servlet.multipart.max-file-size=-1
+# DataSource Setting(mysql)
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/jpadb
+spring.datasource.username=testjpa
+spring.datasource.password=testjpa
+# JPA
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.show_sql=true
+
+
+[WebConfig.java]
+
+package com.minishop;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+   @Override
+   public void addCorsMappings(CorsRegistry registry) {
+       registry.addMapping("/**")
+               .allowedOrigins("http://localhost:5173", "http://localhost:3000")
+               .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+               .allowedHeaders("*");
+   }
+}
+
+
+
+
+
+[Product.java]
+
+package com.minishop.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "products")
+@Data
+@NoArgsConstructor
+public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // 상품 코드
+
+    @Column(nullable = false)
+    private String name; // 상품명
+
+    @Column(length = 500)
+    private String description; // 상품 설명
+
+    private String imageUrl; // 이미지 저장 경로 또는 URL
+}
+
+
+
+[ProductRepository.java]
+
+package com.minishop.dao;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.minishop.entity.Product;
+
+public interface ProductRepository extends JpaRepository<Product, Long>{
+
+}
+
+
+[static/img폴더 생성]
+
+---------------------------------------------------------------------------------------------------
+
+[ProductService.java]
+
+package com.minishop.service;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.minishop.dao.ProductRepository;
+import com.minishop.entity.Product;
+
+---------------------------------------------------------------------------------------------------
+
+@Service
+public class ProductService {
+    
+    @Autowired
+    ProductRepository productRepository;
+
+    public Product saveProduct(Product product, MultipartFile image)throws IOException {
+        //이미지 업로드
+         String uploadDir = new ClassPathResource("static/img").getFile().getAbsolutePath();
+        String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.write(filePath, image.getBytes());
+        
+        product.setImageUrl("/img/"+fileName);
+
+        return productRepository.save(product);
+    }
+
+    public Page<Product> getProducts(Pageable pageable) {
+        Page<Product> p = productRepository.findAll(pageable);
+        System.out.println(p.getContent().get(0));
+        return p;
+    }
+
+    public Optional<Product> getProduct(Long id) {
+        return productRepository.findById(id);
+    }
+}
+
+
+
+[ProductController.java]
+
+package com.minishop.controller;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.minishop.entity.Product;
+import com.minishop.service.ProductService;
+
+@RestController
+@RequestMapping("/api/products")
+public class ProductController {
+
+    @Autowired
+    ProductService productService;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Product> createProduct(Product product, @RequestParam MultipartFile image) throws IOException {
+        System.out.println(product);
+            return ResponseEntity.ok(productService.saveProduct(product, image));
+        
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Product>> getProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(productService.getProducts(pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+        return productService.getProduct(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
+}
+
+
+
+
+--------------- FRONT ---------------
+
+cmd> npm i react-redux react-router-dom @reduxjs/toolkit axios
+
+
+
+[store/cartSlice.jsx]
+
+import { createSlice } from '@reduxjs/toolkit';
+
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState: [],
+  reducers: {
+    addToCart: (state, action) => {
+        const exists = state.find(item => item.id === action.payload.id);
+        if(exists){
+          alert("이미 추가된 상품입니다.")
+         
+        }else{
+          alert("장바구니 추가 완료")
+          state.push(action.payload);
+          
+        };
+    },
+    removeFromCart: (state, action) => {
+      return state.filter(item => item.id !== action.payload);
+    },
+    clearCart: () => []
+  }
+});
+
+export const { addToCart, removeFromCart, clearCart } = cartSlice.actions;
+export default cartSlice.reducer;
+
+
+
+[/page/ProductList.jsx]
+
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+
+export default function ProductList() {
+  const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(0);
+
+  
+  useEffect(() => {
+    axios.get(`http://localhost:8080/api/products?page=0&size=10`)
+      .then(res => setProducts(res.data.content))
+      .then(console.log(products))
+      ;
+  }, []);
+
+  useEffect(() => {
+    axios.get(`http://localhost:8080/api/products?page=${page}&size=10`)
+      .then(res => setProducts(res.data.content));
+  }, [page]);
+
+  return (
+    <div>
+      <h2>전체 상품 리스트</h2>
+      {products && products.map(p => (
+        <div key={p.id}>
+          <Link to={`/products/${p.id}`}>
+            <img src={`http://localhost:8080${p.imageUrl}`} alt={p.name} width="100" />
+          </Link>
+          <h3>{p.name}</h3>
+          <p>{p.description}</p>
+        </div>
+      ))}
+      <button onClick={() => setPage(prev => Math.max(prev - 1, 0))}>이전</button>
+      <button onClick={() => setPage(prev => prev + 1)}>다음</button>
+    </div>
+  );
+}
+
+
+
+
+[/page/ProductForm.jsx]
+
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+function ProductForm() {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    if (image) formData.append("image", image);
+
+    try {
+    //axios 작업 추가
+    await axios.post("http://localhost:8080/api/products", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+
+      alert("상품이 등록되었습니다.");
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      alert("상품 등록 실패");
+    }
+  };
+
+  return (
+    <div>
+      <h2>상품 등록</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>상품명</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+        </div>
+        <div>
+          <label>설명</label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
+        </div>
+        <div>
+          <label>이미지</label>
+          <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+        </div>
+        <button type="submit">등록</button>
+      </form>
+    </div>
+  );
+}
+
+export default ProductForm;
+
+
+[/page/ProductDetail.jsx]
+
+
+import { useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../store/cartSlice";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function ProductDetail() {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    axios.get(`http://localhost:8080/api/products/${id}`).then(res => setProduct(res.data));
+  }, [id]);
+
+  if (!product) return <div>로딩중...</div>;
+
+  return (
+    <div>
+      <img src={`http://localhost:8080${product.imageUrl}`} alt={product.name} width="200" />
+      <h2>{product.name}</h2>
+      <p>{product.description}</p>
+      <button onClick={() => dispatch(addToCart(product))}>장바구니</button>
+    </div>
+  );
+}
+
+
+
+
+[/page/Cart.jsx]
+
+
+import { useSelector, useDispatch } from "react-redux";
+import { removeFromCart, clearCart } from "../store/cartSlice";
+import { Link } from "react-router-dom";
+
+export default function Cart() {
+  const cart = useSelector(state => state.cart);
+  const dispatch = useDispatch();
+
+  return (
+    <div>
+      <h2>장바구니</h2>
+      {cart && cart.map(item => (
+        <div key={item.id}>
+          <Link to={`/products/${item.id}`}> 
+          <img src={`http://localhost:8080${item.imageUrl}`} alt={item.name} width="200" />
+          </Link>
+          <span style={{fontsize: '50px'}}>{item.name}</span>
+          <button onClick={() => dispatch(removeFromCart(item.id))}>삭제</button>
+        </div>
+      ))}
+      <button onClick={() => dispatch(clearCart())}>장바구니 비우기</button>
+    </div>
+  );
+}
+
+
+[App.jsx]
+
+import { Outlet, Link } from "react-router-dom";
+
+export default function App() {
+  return (
+    <div>
+      <header>
+        <nav>
+          <Link to="/">상품 리스트</Link> | 
+          <Link to="/add-product">상품 등록</Link> | 
+          <Link to="/cart">장바구니</Link>
+        </nav>
+      </header>
+      <Outlet />
+    </div>
+  );
+}
+
+
+[main.jsx]
+
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import ProductList from './page/ProductList.jsx'
+import ProductForm from './page/ProductForm.jsx'
+import Cart from './page/Cart.jsx'
+import ProductDetail from './page/ProductDetail.jsx'
+import store from './store';
+import { Provider } from 'react-redux';
+
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+
+    <Provider store={store}>
+    <BrowserRouter>
+    <Routes>
+  <Route path="/" element={<App />}>
+    <Route path="/" element={<ProductList />} />
+    <Route path="products/:id" element={<ProductDetail />} />
+    <Route path="add-product" element={<ProductForm />} />
+    <Route path="cart" element={<Cart />} />
+  </Route>
+</Routes>
+</BrowserRouter>
+</Provider>
+  </StrictMode>,
+)
+
+
+
