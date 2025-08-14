@@ -147,7 +147,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
 
 [static/img폴더 생성]
 
----------------------------------------------------------------------------------------------------
+
 
 [ProductService.java]
 
@@ -170,7 +170,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.minishop.dao.ProductRepository;
 import com.minishop.entity.Product;
 
----------------------------------------------------------------------------------------------------
+
 
 @Service
 public class ProductService {
@@ -181,6 +181,7 @@ public class ProductService {
     public Product saveProduct(Product product, MultipartFile image)throws IOException {
         //이미지 업로드
          String uploadDir = new ClassPathResource("static/img").getFile().getAbsolutePath();
+
         String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
         Path filePath = Paths.get(uploadDir, fileName);
         Files.write(filePath, image.getBytes());
@@ -520,4 +521,16 @@ createRoot(document.getElementById('root')).render(
 )
 
 
+[store.jsx]
 
+import { configureStore } from '@reduxjs/toolkit';
+import cartReducer from './store/cartSlice';
+//store에 등록
+// slice별로 state가 분리되어 있지만 하나의 store에서 관리됨
+const store = configureStore({
+  reducer: {
+    cart: cartReducer,
+  },
+});
+
+export default store;

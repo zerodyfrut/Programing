@@ -1,83 +1,140 @@
-import axios from "axios";
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { deleteProduct, fetchProducts, setPage } from "../slice/ProductSlice";
+import { deleteProduct, fetchProducts, setPage, searchProducts } from "../slice/ProductSlice";
 
 const ProductList = () => {
     const dispatch = useDispatch();
-    const { products, totalPages, loading, error } = useSelector((state) => state.shopping);
-    const page = useSelector(state => state.shopping.page);
+    const { products, totalPages, loading, error, page } = useSelector((state) => state.shopping);
+    const [searchQuery, setSearchQuery] = useState("");
+    const debounceTimer = useRef(null);
 
     useEffect(() => {
         dispatch(fetchProducts(page));
-    }, [dispatch, page])
+    }, [dispatch, page]);
 
     const onDelete = (productId) => {
         dispatch(deleteProduct(productId));
-    }
+    };
 
-    if (loading) return <p>상품목록을 읽는중..</p>
-    if (error) return <p>{error}</p>
+    const handleSearch = (query) => {
+        if (!query.trim()) {
+            dispatch(setPage(0));
+            dispatch(fetchProducts(0));
+        } else {
+            dispatch(setPage(0));
+            dispatch(searchProducts(query));
+        }
+    };
 
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+            handleSearch(value);
+        }, 500);
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === "Enter") {
+            if (debounceTimer.current) clearTimeout(debounceTimer.current);
+            handleSearch(searchQuery);
+        }
+    };
 
     return (
-        <>
-            <div>
-                <h2>상품 목록</h2>
-                {products.length === 0 ? (
-                    <p>등록된 상품이 없습니다.</p>
-                ) : (
-                    <ul>
-                        {products.map((product) => (
-                            <li key={product.productId}>
-                                <Link to={`/product/${product.productId}`}>{product.name}</Link><br />
-                                {/* 상품명 : {product.name}<br /> */}
-                                가격 : {product.price}<br />
-                                {/* 리스트에서 상세설명을 보여줄 필욘 없겠지. */}
+        <div>
+            <h2>상품 목록</h2>
 
-                                <button onClick={() => onDelete(product.productId)}>제품삭제</button>
-                                <hr />
-                            </li>
-                        ))}
-                    </ul>
-                )}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    onKeyPress={handleKeyPress}
+                    placeholder="상품 이름 검색"
+                    style={{ flex: 1, padding: "5px" }}
+                />
+                <button onClick={() => handleSearch(searchQuery)} style={{ padding: "5px 10px" }}>
+                    검색
+                </button>
             </div>
-            <div>
-                <button
-                    onClick={() => {
-                        dispatch(setPage(page - 1));
-                        dispatch(fetchProducts(page - 1));
-                    }}
-                    disabled={page === 0}>
-                    이전</button>
 
-                {Array.from({ length: totalPages }, (_, idx) => (
-                    <button
-                        key={idx}
-                        onClick={() => {
-                            dispatch(setPage(idx));
-                            dispatch(fetchProducts(idx));
-                        }}
-                        style={{
-                            fontWeight: idx === page ? "bold" : "normal",
-                            margin: "0 5px",
-                        }}
-                    >
-                        {idx + 1}
-                    </button>
-                ))}
-                <button
-                    onClick={() => {
-                        dispatch(setPage(page + 1));
-                        dispatch(fetchProducts(page + 1));
-                    }}
-                    disabled={page + 1 === totalPages}>
-                    다음</button>
+            {loading && <p>상품목록을 읽는중..</p>}
+            {error && <p>{error}</p>}
 
-            </div >
-        </>
-    )
-}
+            {!loading && !error && (
+                <>
+                    {products.length === 0 ? (
+                        <p>등록된 상품이 없습니다.</p>
+                    ) : (
+                        <ul>
+                            {products.map((product) => (
+                                <li key={product.productId} style={{ marginBottom: 20 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                                        <img
+                                            src={product.image ? `http://localhost:8080${product.image}` : ""}
+                                            alt={product.name}
+                                            style={{ width: 100, height: 100, objectFit: "cover" }}
+                                        />
+
+                                        <div>
+                                            <Link
+                                                to={`/product/${product.productId}`}
+                                                style={{ fontWeight: "bold", fontSize: 16 }}
+                                            >
+                                                {product.name}
+                                            </Link>
+                                            <p>가격: {product.price}</p>
+
+                                            <div style={{ display: "flex", gap: "10px", marginTop: 5 }}>
+                                                <button onClick={() => onDelete(product.productId)}>
+                                                    제품삭제
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr style={{ marginTop: 10 }} />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    {/* 페이지네이션 */}
+                    <div style={{ marginTop: 20 }}>
+                        <button
+                            onClick={() => dispatch(setPage(page - 1))}
+                            disabled={page === 0}
+                        >
+                            이전
+                        </button>
+
+                        {Array.from({ length: totalPages }, (_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => dispatch(setPage(idx))}
+                                style={{
+                                    fontWeight: idx === page ? "bold" : "normal",
+                                    margin: "0 5px",
+                                }}
+                            >
+                                {idx + 1}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => dispatch(setPage(page + 1))}
+                            disabled={page + 1 === totalPages}
+                        >
+                            다음
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
 
 export default ProductList;
