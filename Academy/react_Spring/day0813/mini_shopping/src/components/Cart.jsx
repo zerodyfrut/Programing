@@ -1,41 +1,37 @@
-import { useDispatch, useSelector } from "react-redux";
-import { outProduct, putProduct } from "../slice/ProductSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { clearCart, outProduct, putProduct } from "../slice/ProductSlice";
 
 const Cart = () => {
-
     const dispatch = useDispatch();
-
-    const cartItems = useSelector((state) => state.shopping.cartItems);
-
-    const totalPrice = useSelector((state) => state.shopping.totalPrice);
+    const { cartItems, totalPrice } = useSelector(state => state.shopping);
 
     return (
-        <>
-            <div>
-                <h2>장바구니</h2>
-                {cartItems.length === 0 ? (
-                    <p>등록된 상품이 없습니다.</p>
-                ) : (
+        <div>
+            <h2>장바구니</h2>
+            {cartItems.length === 0 ? (
+                <p>장바구니가 비어있습니다.</p>
+            ) : (
+                <>
                     <ul>
-                        {cartItems.map((product) => (
-                            <li key={product.productId}>
-                                상품명 : {product.name}<br />
-                                1개당 가격 : {product.price}<br />
-                                수량 : {product.quantity}<br />
-                                해당 제품의 총 가격 : {product.price * product.quantity}<br />
-                                <div style={{gap : "10px"}}>
-                                    <button onClick={() => dispatch(putProduct(product))}>추가</button>
-                                    <button onClick={() => dispatch(outProduct(product))}>삭제</button>
-                                </div>
-                                <hr />
+                        {cartItems.map(item => (
+                            <li key={item.productId} style={{ marginBottom: 10 }}>
+                                {item.name} - {item.quantity}개 - {item.price * item.quantity}원
+                                <button onClick={() => dispatch(outProduct(item))} style={{ marginLeft: 5 }}>-1</button>
+                                <button onClick={() => dispatch(putProduct(item))} style={{ marginLeft: 5 }}>+1</button>
                             </li>
                         ))}
                     </ul>
-                )}
-                전체 총 가격 : {totalPrice}<br />
-            </div>
-        </>
-    )
-}
+                    <p>총 금액: {totalPrice}원</p>
+                    <button
+                        onClick={() => dispatch(clearCart())}
+                        style={{ backgroundColor: "red", color: "white", padding: "5px 10px", marginTop: 10 }}
+                    >
+                        장바구니 비우기
+                    </button>
+                </>
+            )}
+        </div>
+    );
+};
 
 export default Cart;
