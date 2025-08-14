@@ -1,0 +1,8 @@
+- 오전 : day8013의 minishop_만들기.txt 내용 작성 (강사님이 주신 코드)
+          어제 주셔서 작성하던거라 해당내용은 day0813에 있음.
+
+- 오후 (4:30~) : 실시간 검색 필터 만들기.txt 진행
+
+	        - filter 함수와 tolowerCase()
+                    - input 의 onChange()와 value
+	        - fliterFruits 의 map 을 통한 결과물 출력
