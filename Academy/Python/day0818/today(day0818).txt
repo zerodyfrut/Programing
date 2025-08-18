@@ -1,0 +1,19 @@
+Python
+
+-core
+python 설치
+(vscode - Python, jupyter 설치 (이전에 설치해서 실행할 필요 x)
+
+cmd > python --version : 설치된 버전 확인 
+
+자료구조
+리스트[ ] 
+튜플( ) : 순서는 있으나 값의 변경 불가
+set{값, 값} 
+딕셔너리{이름 : 값} 
+
+
+-data anlysis
+-AI (인공 신경망)
+-AI api(LLM)
+
