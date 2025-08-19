@@ -1,0 +1,8 @@
+STR
+
+인덱싱
+슬라이싱
+split()
+count()
+find()
+len()
