@@ -1,0 +1,118 @@
+1. 리스트 컴프리헨션
+-> 결국 리스트를 만드는것, 근데 for if를 따로쓰기 귀찮아서 한군데 때려박은거
+
+1) list = [식 for 변수 in range(범위)]
+    기본형, for문을 돌린 값(식)을 가지고 list를 만든다.
+cf.
+    list = []
+    for 변수 in range(범위) :
+    식
+
+2) list = [식 for 변수 in range(범위) if 조건식]
+    for문을 돌리면서 조건식에 True인 값(식)을 가지고 list를 만든다.
+cf.
+    list = []
+    for 변수 in range(범위) :
+        if 조건식 :
+            식
+
+3)list = [식1 if 조건식 else 식2 for 변수 in range(범위)]
+    for문을 돌리면서 조건식에 True 일때는 식1의 값을,
+    False 일때는 식2의 값을 가지고 list를 만든다.
+    왜 이때는 if문이 for 앞으로 오는지는 모르겠으나, 문법이 그렇다고 하니..
+cf. 
+    list = []
+    for 변수 in range(범위) : 
+        if 조건식 :
+            식1
+        else :
+            식2
+
+4)list = [식 for 변수1 in range(범위1) for 변수2 in range(범위2)]
+    for문을 중첩하여 해당 값(식)을 가지고 list를 만든다.
+cf.
+    list = []
+    for 변수1 in range(범위1) :
+        for 변수2 in range(범위2) :
+            식
+
+
+2. lamda : 익명함수
+    파이썬에서는 람다식을 잘 안씀.. 그냥 형태만 보는정도면 될듯함.
+cf.
+    f=lambda x,y:x+y
+    print(f(1,4))
+
+    -> 5
+
+
+3. function
+1) join(자료구조)
+    묶여져 있는걸 풀어서 하나로 뭉침
+cf.
+    colors=['red' 'blue' 'green']
+    result=''.join(colors)
+    print(result) -> 'redbluegreen'
+
+2) enumerate(자료구조)
+    for 문으로 값을 뽑을 때, index와 value 값을 튜플로 뽑아냄
+cf.
+    for i,v in enumerate ('a,b,c,d,e,f,g'.split(',')) : 
+        print(i,":",v, sep=" ", end=" ")
+
+3) zip(자료구조,자료구조)
+    여러 개의 자료구조에서 같은 인덱스의 값을 묶어줌, 얘도 튜플로 묶음
+    열의 값이 부족하면 해당 열은 제외하고 행으로 묶는다.
+cf.
+    alist=['a1','a2']
+    blist=['b1','b2']
+
+    for a,b in zip(alist,blist) :
+        print(a,b) 
+
+    -> a1 b1
+       a2 b2
+
+4) map(함수,자료구조)
+    자료구조에 있는 모든 값에 동일한 효과를 적용, 반환값이 map이라 강제캐스팅 필요
+    근데 컴프리헨션이 더 짧고 편해서 잘 안쓰임.
+cf.
+    ex=[1,2,3,4,5]
+
+    def f(x): return x**2
+
+    result=list(map(f,ex))
+    print(result)
+
+    -> [1, 4, 9, 16, 25]
+
+5) reduce(함수,자료구조)
+    map이랑 같이 자주 쓰이는 함수
+    자료구조 내 값을 통합 (from functools import reduce 작성필)
+    굳이? sum을 두고, import까지 해야하는 걸 써야하나?
+cf.
+    ex=[1,2,3,4,5]
+
+    print(reduce(lambda x,y: x+y,ex))
+    print(sum(ex))
+    
+    -> 15
+
+
+4. matrix (행렬)
+1) *를 사용해 패킹/언패킹을 할 수 있음
+2) all() : ()내 값이 모두 True 면 True, and 연산과 동
+3) any() : ()내 값이 하나라도 True 면 True, or 연산과 동
+4) 그 외 matrix의 합연산, 곱연산, 동치확인, 전치행렬(행열전환)
+
+
+5. module(모듈)
+
+- import 모듈이름 (예) import os
+    모듈만 import 했기 때문에 함수 사용할때 모듈.함수명 이렇게 사용해야함
+- import 모듈이름 as 별칭 (예) import pandas as pd
+    별칭을 붙이는 순간 별칭으로 접근
+- from 모듈이름 import 모듈함수 (예) from os import listdir … 모듈이름을 앞에 붙이지 않고도 사용
+    함수를 import했기 때문에 해당함수를 바로 사용 가능
+- from 모듈이름 import * (예) from mod1 import *
+    해당 모듈의 있는 것들을 전부 사용할 수 있음
