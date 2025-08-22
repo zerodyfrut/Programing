@@ -1,0 +1,43 @@
+#text {
+  color: red;
+}
+p, blockquote {
+  color: rgb(96, 139, 78);
+  font-style: italic;
+  font-size: small;
+  background-color: rgb(37, 37, 38);
+}
+table {
+  border-collapse: collapse;
+  
+  background: none;
+}
+tr, th, td {
+  border: 1px solid lightgray;
+}
+th {
+  background-color: lightgray;
+  color: black;
+}
+
+button {
+  cursor: pointer;
+  animation: c 3s infinite;
+  background-color: red;
+  border: none; 
+  color: white;
+  padding: 5px 10px;
+}
+@keyframes c {
+  0% { background-color: red; }
+  10% { background-color: orange; }
+  20% { background-color: yellow; }
+  30% { background-color: lightgreen; }
+  40% { background-color: green; }
+  50% { background-color: lightskyblue; }
+  60% { background-color: skyblue; }
+  70% { background-color: blue; }
+  80% { background-color: purple; }
+  90% { background-color: lightpink; }
+  100% { background-color: red; }
+}
