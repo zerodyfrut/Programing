@@ -1,0 +1,27 @@
+1. 가상환경 설정
+1) 생성
+    python -m venv 가상환경이름
+    cmd> python -m venv analysis
+
+2) 가상환경 활성화
+    가상환경이름\Scripts\activate
+    cmd>analysis\Scripts\activate
+
+    활성화 되면 경로 앞에 (가상환경) 이 붙어있음
+
+3) 가상환경 비활성화
+    cmd>deactivate
+
+
+
+2. DB 연동
+1) pip install pymysql
+
+2) 관련함수
+    - 레코드 가져오는 함수
+        fetchall() : 전부 가져오기
+        fetchone() : 한 행 가져오기
+        fetchmany(int) : 지정한 개수만큼만 가져오기
+
+
+파일 다 날아감 조졌다...
