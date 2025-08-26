@@ -1,0 +1,139 @@
+
+[가상환경 설치/활성화/비활성화]
+python -m venv analysis
+analysis\Scripts\activate
+deactivate
+
+[넘파이, 판다스, 맷플롯립 설치]
+python -m pip install --upgrade pip
+python -m pip install numpy pandas matplotlib
+
+[가상환경 폴더 밖에서 접근]
+import os
+os.chdir(r'D:\새 폴더\Programing\Academy\Python\day0826')
+
+
+1. numpy function
+- import numpy as np
+1) random.randint(n1,n2,[n3,n4])
+   : n1 ~ n2-1 사이의 변수로 [n3,n4] 배열 생성
+cf.
+a = np.random.randint(1, 11, [2, 3])
+
+   -> [[1 3 6]
+       [3 7 5]]
+
+2) np.less_equal(a,b) 
+: a와 b의 인덱스 값을 비교(a<=b) T/F 반환
+cf.
+b = np.random.randint(1, 11, [2, 3])
+
+j=np.less_equal(a, b) 
+   ->[[ True  True False]
+      [ True False  True]]
+
+3) np.maximum(배열1, 배열2)
+: 같은 인덱스의 값끼리 비교, 큰 값으로 이루어진 배열 반환
+
+4) np.minimum(배열1, 배열2)
+: 같은 인덱스의 값끼리 비교, 작은 값으로 이루어진 배열 반환
+
+5) np.add(배열1, 배열2)
+: 같은 인덱스의 값을 합산한 배열 반환
+
+6) np.divide(배열1,n3)
+: 배열1의 각 인덱스의 값을 n3으로 나눈 배열 반환
+
+7) greater(배열1,n1)
+: 배열1의 값이 n1보다 큰값을 True로, 작으면 False인 배열 반환
+
+
+2. pandas
+- import pandas as pd
+
+
+3. pd.Series(배열)
+: 배열1의 값의 index 을 기준으로 한 한줄짜리 표 생성
+cf.
+data1=[10,20,30,40,50]
+s1=pd.Series(data1)
+   -> 
+   0    10
+       1    20
+       2    30
+       3    40
+       4    50
+       dtype: int64
+
+
+4. pd.DataFrame(dict) 
+: 딕셔너리형 자료를 판다스로 가공
+cf.
+data = {'name' : ['Mark','Jane','Chris','Ryan'],
+ 'age': [33, 32, 44, 42],
+ 'score': [91.3, 83.4, 77.5, 87.7]}
+
+df = pd.DataFrame(data)
+   ->
+    name  age  score
+0   Mark   33   91.3
+1   Jane   32   83.4
+2  Chris   44   77.5
+3   Ryan   42   87.7
+
+1) DataFrame 사용시, index 와 column에 원하는 값을 넣을 수 있음
+cf.
+data2=['A','B','C','D','E']
+df2=pd.DataFrame([[89.2,92.6,90.8],[92.8,89.9,95.2]],index=['중간','기말'],columns=data2[0:3])
+   ->
+학번	이름	중간고사	기말고사
+0	20251101	Hong	90	95
+1	20251102	Kim	93	94
+2	20251103	Lee	87	97
+
+2) head(int) / tail(int)
+: 앞/ 뒤에서부터 특정 개수의 값을 가져올 수 있음
+default 값은 컬럼을 제외, 5줄인 듯
+
+3) index자리에 컬럼명을 넣어 해당 컬럼의 값만 가져올 수 있다.
+cf.
+df2['이름']
+   ->
+0    Hong
+1     Kim
+2     Lee
+Name: 이름, dtype: object
+
+4) 컬럼으로 열 삭제
+- drop(columns='컬럼명') : 원본 적용 x
+- drop(columns='컬럼명',inplace=True) : 원본 적용
+
+5) index로 특정행 삭제
+- drop(index) : 원본 적용 x
+- drop(index,inplace=True) : 원본 적용
+
+6) 컬럼명 수정
+cf.
+- rename(columns={df3.columns[0]: 'Name', df3.columns[1]:'Mid'},inplace=True)
+
+7) sum() 
+: 각 컬럼의 값을 더 함
+문자열은 이어쓰기
+cf.
+df.sum()
+
+8) mean() 
+: 특정 컬럼의 값의 평균
+cf.
+df['age'].mean()
+
+
+5. pandas function
+
+
+
+
+pip install openpyxl
+
+
+display
