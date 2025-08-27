@@ -130,7 +130,7 @@ df['age'].mean()
 
 5. pandas function
 
-
+......
 
 
 pip install openpyxl

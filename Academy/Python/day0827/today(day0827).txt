@@ -1,0 +1,7 @@
+
+pandas function
+to_numeric : 해당 값을 숫자로 변경
+    errors='coerce' 설정 : 숫자로 못바꾸면 강제로 NaN 변환
+
+drop_duplicates() :Seris 함수, 중복제거(기존 인덱스 유지)
+.reset_index(drop=True) 추가 : 인덱스도 리셋
