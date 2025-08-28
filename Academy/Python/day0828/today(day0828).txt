@@ -1,0 +1,6 @@
+
+pip install selenium
+
+pip install beautifulsoup4
+
+하나도 모르겠다.
