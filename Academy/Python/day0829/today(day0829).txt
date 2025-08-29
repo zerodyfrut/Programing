@@ -1,0 +1,82 @@
+cf. 모달윈도우
+
+execute_script('functionName') : 스크립트 함수 실행
+
+
+
+
+Streamlit 이란?
+Python을 사용하여 빠르게 웹 애플리케이션을 개발할 수 있도록 도와주는 오픈소스 프레임워크
+데이터 시각화, 대시보드, AI/머신러닝 모델을 웹으로 배포
+
+특징
+쉬운 사용법 : HTML, CSS, JavaScript 없이 순수 Python 코드만으로 웹앱을 개발할 수 있다.
+streamlit run 명령어 하나로 실행 가능.
+
+빠른 데이터 시각화 : Pandas의 DataFrame, Matplotlib, Plotly, Seaborn 등의 차트를 쉽게 웹에 표시.
+
+인터랙티브 UI 지원 :st.button(), st.slider(), st.selectbox() 등을 이용해 사용자 입력을 처리할 수 있음.
+
+머신러닝 모델 배포 용이 : Scikit-learn, TensorFlow, PyTorch 등의 모델을 웹에서 실행 가능.
+코드 수정 후 새로고침 없이 자동 업데이트.
+
+
+[Streamlit 설치]
+pip install streamlit 
+[웹앱 실행]
+streamlit run app.py 
+- 최초 실행 시 이메일 주소를 입력(없는 이메일도 가능)
+[웹앱 종료]
+Ctrl + c
+
+
+
+tkinter : Python 표준 라이브러리로 제공되며, 추가 설치 없이 사용 가능하다. 간단한 GUI 프로그램을 만들기에 적합하다.
+PyQt : 강력한 기능과 유연성을 제공하며, 복잡한 GUI 프로그램을 만들 때 유용하다.
+PySide : PyQt와 유사한 기능을 제공하며, Qt 공식 지원을 받는 라이브러리이다.
+Kivy : 멀티터치 인터페이스 및 모바일 애플리케이션 개발을 위한 라이브러리이다.
+
+윈도우(Window) : GUI 프로그램의 기본 틀로, 화면에 표시되는 창이다.
+위젯(Widget) : 버튼(Button), 레이블(Label), 입력 상자(Entry) 등 사용자와 상호작용하는 요소이다.
+이벤트(Event) : 사용자의 입력(클릭, 키보드 입력 등)에 따라 실행되는 동작이다.
+레이아웃(Layout) : 위젯을 화면에 배치하는 방법을 결정한다.
+
+
+
+[tkinter] : 따로 설치x
+[위젯]
+Label  	          	텍스트를 출력하는 레이블
+Button   	  	버튼을 생성하고 클릭 이벤트를 처리
+Entry  		한 줄짜리 입력 필드
+Text  		여러 줄 텍스트 입력 창
+Frame  		다른 위젯을 포함할 수 있는 컨테이너
+Canvas  		그래픽을 그리거나 이미지 표시
+Checkbutton  	체크박스를 생성
+Radiobutton  	여러 개의 라디오 버튼 중 하나 선택
+Listbox  		여러 개의 항목을 리스트로 표시
+Scrollbar  	스크롤이 필요한 경우 사용
+
+
+
+[PyQt]
+[pyqt5 설치] : GUI 개발용 파이썬 라이브러리
+pip install pyqt5
+
+QLabel
+텍스트 또는 이미지를 표시하는 레이블
+QPushButton
+클릭 가능한 버튼
+QLineEdit
+한 줄짜리 텍스트 입력 필드
+QTextEdit
+여러 줄 텍스트 입력 필드
+QCheckBox
+체크박스를 생성
+QRadioButton
+여러 개의 옵션 중 하나를 선택하는 라디오 버튼
+QListWidget
+리스트 형태로 여러 항목을 표시
+QComboBox
+드롭다운 목록을 제공
+QTableWidget
+표 형식 데이터를 표시하는 테이블 위젯
