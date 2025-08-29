@@ -3,4 +3,6 @@ pip install selenium
 
 pip install beautifulsoup4
 
+크롤링
+
 하나도 모르겠다.

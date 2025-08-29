@@ -1,0 +1,41 @@
+
+[가상환경 설치/활성화/비활성화]
+python -m venv analysis
+analysis\Scripts\activate
+deactivate
+
+
+[넘파이, 판다스, 맷플롯립, Seaborn 설치] 
+: 행렬 계산, 데이터프레임(표), 시각화(그래프, 차트 등), 고급 시각화(맵플롯립 기반), 대화형 그래프(확대 축소,범례 클릭 등)
+python -m pip install --upgrade pip
+python -m pip install numpy pandas matplotlib
+pip install seaborn
+pip install plotly
+
+
+[openpyxl] : 엑셀의 읽고 쓰기, 판다스 연동 가능
+pip install openpyxl
+
+
+[WordCloud 설치] : 그림에 글자 넣기
+pip install wordcloud
+
+
+[크롤링 관련 설치 (정적/동적/api)] : 인터넷에서 긁어오는거
+pip install beautifulsoup4
+pip install selenium
+pip install requests
+
+
+[Streamlit 설치] : Python을 사용하여 빠르게 웹 애플리케이션을 개발할 수 있도록 도와주는 오픈소스 프레임워크.
+	          데이터 시각화, 대시보드, AI/머신러닝 모델을 웹으로 배포
+pip install streamlit 
+[웹앱 실행]
+streamlit run app.py 
+- 최초 실행 시 이메일 주소를 입력(없는 이메일도 가능)
+[웹앱 종료]
+Ctrl + c
+
+
+[pyqt5 설치] : GUI 개발용 파이썬 라이브러리
+pip install pyqt5
