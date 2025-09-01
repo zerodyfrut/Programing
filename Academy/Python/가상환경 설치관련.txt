@@ -5,13 +5,14 @@ analysis\Scripts\activate
 deactivate
 
 
-[넘파이, 판다스, 맷플롯립, Seaborn 설치] 
+[넘파이, 판다스, 맷플롯립, Seaborn]
 : 행렬 계산, 데이터프레임(표), 시각화(그래프, 차트 등), 고급 시각화(맵플롯립 기반), 대화형 그래프(확대 축소,범례 클릭 등)
 python -m pip install --upgrade pip
 python -m pip install numpy pandas matplotlib
 pip install seaborn
 pip install plotly
 
+python -m pip install numpy pandas matplotlib seaborn plotly
 
 [openpyxl] : 엑셀의 읽고 쓰기, 판다스 연동 가능
 pip install openpyxl
@@ -21,13 +22,15 @@ pip install openpyxl
 pip install wordcloud
 
 
-[크롤링 관련 설치 (정적/동적/api)] : 인터넷에서 긁어오는거
+[크롤링 관련 (정적/동적/api)] : 인터넷에서 긁어오는거
 pip install beautifulsoup4
 pip install selenium
 pip install requests
 
+pip install beautifulsoup4 selenium requests
 
-[Streamlit 설치] : Python을 사용하여 빠르게 웹 애플리케이션을 개발할 수 있도록 도와주는 오픈소스 프레임워크.
+
+[Streamlit] : Python을 사용하여 빠르게 웹 애플리케이션을 개발할 수 있도록 도와주는 오픈소스 프레임워크.
 	          데이터 시각화, 대시보드, AI/머신러닝 모델을 웹으로 배포
 pip install streamlit 
 [웹앱 실행]
@@ -37,5 +40,21 @@ streamlit run app.py
 Ctrl + c
 
 
-[pyqt5 설치] : GUI 개발용 파이썬 라이브러리
+[pyqt5] : GUI 개발용 파이썬 라이브러리
 pip install pyqt5
+
+
+[scipy, statsmodels] :과학/공학 계산, 수학 함수, 통계, 신호처리 / 통계 분석, 회귀분석, 시계열 분석
+pip install scipy
+pip install statsmodels
+
+
+[scikit-learn, pydotplus] 
+: 머신러닝 라이브러리 (분류, 회귀, 군집, 차원축소 등)
+: .dot 파일(그래프 구조를 나타내는 텍스트 파일)을 파이썬 객체로 읽어서 다룸
+pip install scikit-learn 
+pip install pydotplus
+
+
+[folium] : 지도 데이터를 시각화해주는 패키지
+pip install folium
