@@ -52,9 +52,21 @@ pip install statsmodels
 [scikit-learn, pydotplus] 
 : 머신러닝 라이브러리 (분류, 회귀, 군집, 차원축소 등)
 : .dot 파일(그래프 구조를 나타내는 텍스트 파일)을 파이썬 객체로 읽어서 다룸
-pip install scikit-learn 
+pip install scikit-learn
 pip install pydotplus
 
 
 [folium] : 지도 데이터를 시각화해주는 패키지
 pip install folium
+
+
+
+[Flask 개발 가상환경 생성/활성화/설치] : Flask 관련 웹 개발 가상환경
+
+python -m venv flask_web
+flask_web\Scripts\activate
+pip install flask
+
+
+[pymysq] : MySQL 관련
+pip install pymysql
