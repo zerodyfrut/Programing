@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- flask에서 사용하는 템플릿 엔진 : jinja2 -->
+
+    <h3>{{start}}단 ~ {{end}}단</h3>
+    <table border=1>
+        {% for i in range(start,end +1) %}
+        <tr>
+            <th>{{i}}단</th>
+            {% for j in range(1,10) %}
+            <td>{{i}} x {{j}} = {{i*j}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+
+</html>

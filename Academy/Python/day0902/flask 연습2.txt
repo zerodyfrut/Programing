@@ -1,0 +1,147 @@
+[survey.py]
+
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+
+app = Flask(__name__)
+app.secret_key = "secret123"
+
+# 설문 데이터
+survey = {
+    "question": "가장 좋아하는 과일은 무엇인가요?",
+    "choices": ["사과", "바나나", "포도"],
+    "votes": [0, 0, 0]
+}
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+   
+        choice_index = int(request.form["choice"])
+        print(choice_index)
+        survey["votes"][choice_index] += 1
+
+        return redirect(url_for("result"))
+
+    return render_template("survey/index.html", survey=survey)
+
+@app.route("/result")
+def result():
+    return render_template("survey/result.html", survey=survey)
+
+# AJAX용 엔드포인트: 투표 데이터 반환
+@app.route("/votes")
+def votes():
+    total = sum(survey["votes"])
+    percentages = [round(v / total * 100, 1) if total > 0 else 0 for v in survey["votes"]]
+    return jsonify({"votes": survey["votes"], "percentages": percentages})
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+[survey/index.html]
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>설문조사</title>
+</head>
+<body>
+    <h1>{{ survey.question }}</h1>
+    <form method="post">
+        {% for choice in survey.choices %}
+            <input type="radio" name="choice" value="{{ loop.index0 }}" required> {{ choice }}<br>
+        {% endfor %}
+        <br>
+        <button type="submit">투표하기</button>
+    </form>
+</body>
+</html>
+
+[survey/result.html]
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>투표 결과</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>설문 결과</h1>
+    <p>{{ survey.question }}</p>
+
+    <canvas id="barChart" width="400" height="200"></canvas>
+    <canvas id="pieChart" width="400" height="200"></canvas>
+
+    <ul id="percentList">
+        {% for choice in survey.choices %}
+            <li>{{ choice }}: {{ survey.votes[loop.index0] }}표</li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <a href="/">다시 설문하기</a>
+
+    <script>
+        const labels = {{ survey.choices | tojson }};
+        let votes = {{ survey.votes | tojson }};
+        let percentages = votes.map(v => 0);
+
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        const barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '투표 수',
+                    data: votes,
+                    backgroundColor: ['#ff9999','#99ff99','#9999ff']
+                }]
+            },
+            options: { responsive: false, scales: { y: { beginAtZero: true } } }
+        });
+
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: votes,
+                    backgroundColor: ['#ff9999','#99ff99','#9999ff']
+                }]
+            },
+            options: { responsive: false }
+        });
+
+        // 실시간 업데이트
+        function updateData() {
+            fetch('/votes')
+                .then(response => response.json())
+                .then(data => {
+                    votes = data.votes;
+                    percentages = data.percentages;
+
+                    // 차트 업데이트
+                    barChart.data.datasets[0].data = votes;
+                    barChart.update();
+
+                    pieChart.data.datasets[0].data = votes;
+                    pieChart.update();
+
+                    // 비율 업데이트
+                    const list = document.getElementById('percentList');
+                    list.innerHTML = '';
+                    labels.forEach((label, i) => {
+                        list.innerHTML += `<li>${label}: ${votes[i]}표 (${percentages[i]}%)</li>`;
+                    });
+                });
+        }
+
+        setInterval(updateData, 1000);
+    </script>
+</body>
+</html>
