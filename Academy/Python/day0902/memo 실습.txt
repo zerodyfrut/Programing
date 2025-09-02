@@ -1,0 +1,27 @@
+CREATE DATABASE memo_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- 사용할 계정에 권한 줄 것!!
+
+USE memo_app;
+
+CREATE TABLE memos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+1.'/'
+memos에 저장된 모든 레코드를 꺼내와 출력
+
+2.'/add'
+GET인 경우 메모 입력 폼 출력
+POST 시 insert, 끝나면 목록으로 돌아가기
+
+3.'/edit/<int:memo_id>'
+GET : 해당 메모를 꺼내와 form에 출력,(title, content만 변경가능)
+POST : 입력 받은 값으로 update
+
+4.'/delete/<int:memo_id>'
+메모 삭제 후 목록으로 돌아가기

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>투표 결과</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>투표 결과</h1>
+    <p>{{survey.question}}</p>
+
+    <canvas id="barChart" width="400" height="200"></canvas>
+    <canvas id="pieChart" width="400" height="200"></canvas>
+
+    <ul id="percentList">
+        {% for choice in survey.choices %}
+            <li>{{choice}} : {{survey.votes[loop.index0]}} 표</li>
+        {% endfor %}
+    </ul>
+    <br>
+    <a href="/">재투표하기</a>
+
+    <script>
+        // |tojson 필터 : Python 리스트-> JavaScript 배열로 변환
+        // 초기 데이터 세팅
+        const labels={{survey.choices|tojson}}; 
+        let votes={{survey.votes|tojson}};
+        let percentages=votes.map(v=>0); //초기값(0)설정
+
+        const barCtx=document.getElementById('barChart').getContext('2d');
+        const barChart=new Chart(barCtx,{
+            type:'bar',
+            data:{
+                labels:labels,
+                datasets:[{
+                    label:'투표 수',
+                    data: votes,
+                    backgroundColor:['#ff9999','#99ff99','#9999ff','#999999']
+                }]
+            },
+            options:{responsive:false,scales:{y:{beginAtZero:true}}}
+        });
+        
+        const pieCtx=document.getElementById('pieChart').getContext('2d');
+        const pieChart=new Chart(pieCtx,{
+            type:'pie',
+            data:{
+                labels:labels,
+                datasets:[{
+                    data: votes,
+                    backgroundColor:['#ff9999','#99ff99','#9999ff','#999999']
+                }]
+            },
+            options:{responsive:false} // 캔버스 크기에 맞춤
+        });
+        //실시간 업데이트
+        function updateData(){
+            fetch('/votes')
+            .then(response=> response.json())
+            .then(data=>{
+                votes=data.votes;
+                percentages=data.percentages;
+                
+                // 차트 업데이트
+                barChart.data.datasets[0].data=votes;
+                barChart.update();
+
+                pieChart.data.datasets[0].data=votes;
+                pieChart.update();
+
+                // 비율 업데이트
+                const list=document.getElementById('percentList');
+                list.innerHTML='';
+                labels.forEach((label,i) => {
+                    list.innerHTML += `<li>${label}: ${votes[i]}표 (${percentages[i]}%)</li>`;
+                });
+            });
+        }
+        setInterval(updateData,1000);
+    </script>
+</body>
+</html>

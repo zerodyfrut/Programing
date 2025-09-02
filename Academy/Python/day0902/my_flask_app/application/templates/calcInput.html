@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <a href="http://127.0.0.1:5000/calculate.do?x=10&y=5">
+        10과 5의 사칙연산
+    </a>
+    <hr>
+    <!--form + button
+        form속의 button누르면
+        input에 쓴거를 reqParam으로 만들어서(name이 변수명, 입력한게 값)
+        action에 있는쪽으로 요청을 날려줌-->
+
+    <form action="http://127.0.0.1:5000/calculate.do">
+        x=<input name="x"><br>
+        y=<input name="y"><br>
+        <button>계산</button>
+    </form>
+    <hr>
+    <form action="http://127.0.0.1:5000/gugudan.show" method="post">
+        시작 : <input name="start"><br>
+        끝 : <input name="end"><br>
+        <button>구구단</button>
+    </form>
+</body>
+
+</html>
