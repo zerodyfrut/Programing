@@ -1,0 +1,29 @@
+[Flask 개발 가상환경 생성/활성화/설치] :
+
+python -m venv flask_web
+flask_web\Scripts\activate
+pip install flask
+
+
+브라우저 요청(cf.basic.py)
+-> app = Flask(__name__)
+-> 라우트 확인 @app.route('/')
+-> 뷰함수 실행 -> 결과 반환
+-> Flask가 response 생성 -> 브라우저 전송 -> 화면 출력
+
+
+tamplate이 다른 위치에 있으면 
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR)
+
+
+
+%%를 사용한 반복문 안에서(템플릿 안에서)
+loop.index → 1부터 시작하는 인덱스
+loop.index0 → 0부터 시작하는 인덱스
+loop.first → 첫 번째 요소 여부 (True/False)
+loop.last → 마지막 요소 여부 (True/False)
+loop.length → 전체 길이
