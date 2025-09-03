@@ -1,0 +1,14 @@
+fast api : 웹 어플리케이션 개발할 수 있는 파이썬 웹 프레임 워크
+속도가 빠르고 자동 문서화 지원, 비동기(async/await)지원
+WAS가 따로 필요함 -> uvicorn에 얹어서 실행
+
+uvicorn 파일명 : app --reload
+http://127.0.0.1:8000
+http://127.0.0.1:8000/docs(자동 문서)
+
+
+GET:member -> input.html 파일 렌더링 후 출력
+이름,나이,성별, 취미 입력 받는 form
+
+post:member -> 입력값을 받아서
+JSON 문자열로 출력
