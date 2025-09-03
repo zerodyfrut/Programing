@@ -5,6 +5,28 @@ analysis\Scripts\activate
 deactivate
 
 
+	
+[Flask 개발 가상환경 생성/활성화/설치] : Flask 관련 웹 개발 가상환경
+
+python -m venv flask_web
+flask_web\Scripts\activate
+pip install flask
+
+
+
+[FastAPI 개발 가상환경 생성/활설화/설치/uvicon(ASGI서버)설치] :  FastAPI 관련 웹 개발 가상환경
+python -m venv fast_web
+fast_web\Scripts\activate
+pip install fastapi
+pip install uvicorn[standard]
+
+
+
+[jinja2,python-multipart 설치] : HTML 템플릿 엔진, HTML <form>에서 파일 업로드를 처리할 때 필요
+pip install jinja2 python-multipart
+
+
+
 [넘파이, 판다스, 맷플롯립, Seaborn]
 : 행렬 계산, 데이터프레임(표), 시각화(그래프, 차트 등), 고급 시각화(맵플롯립 기반), 대화형 그래프(확대 축소,범례 클릭 등)
 python -m pip install --upgrade pip
@@ -13,6 +35,7 @@ pip install seaborn
 pip install plotly
 
 python -m pip install numpy pandas matplotlib seaborn plotly
+
 
 [openpyxl] : 엑셀의 읽고 쓰기, 판다스 연동 가능
 pip install openpyxl
@@ -60,13 +83,10 @@ pip install pydotplus
 pip install folium
 
 
-
-[Flask 개발 가상환경 생성/활성화/설치] : Flask 관련 웹 개발 가상환경
-
-python -m venv flask_web
-flask_web\Scripts\activate
-pip install flask
-
-
-[pymysq] : MySQL 관련
+[pymysq] : MySQL/MariaDB와 연결할 수 있는 드라이버
 pip install pymysql
+
+
+[SQLAlchemy] :ython에서 DB를 객체지향적으로 다룰 수 있게 해주는 ORM/DB 툴
+pip install sqlalchemy
+
