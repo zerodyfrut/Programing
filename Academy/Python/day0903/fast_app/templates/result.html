@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결과</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 50px; }
+        .result { background-color: #fff; padding: 20px; border-radius: 10px; width: 300px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; }
+        p { margin: 10px 0; }
+        a { display: block; text-align: center; margin-top: 20px; color: #4CAF50; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+    <div class="result">
+        <h2>등록 완료</h2>
+        <p>이름: {{ result.name }}</p>
+        <p>나이: {{ result.age }}</p>
+        <p>성별: {{ result.gender }}</p>
+        <p>취미: {{ result.hobby }}</p>
+        <a href="/member">다시 입력</a>
+    </div>
+</body>
+
+</html>
