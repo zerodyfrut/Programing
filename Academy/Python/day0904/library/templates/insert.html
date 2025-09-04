@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새 도서 등록</title>
+</head>
+<body>
+    <h1>새 도서 등록</h1>
+    <form action="/books" method="post">
+        <label>제목 : <input type="text" name="title" required></label><br>
+        <label>저자 : <input type="text" name="author" required></label><br>
+        <label>출판년도 : <input type="number" name="year" required></label><br>
+
+        <button type="submit">도서 등록</button>
+    </form>
+    <a href="/">목록으로</a>
+</body>
+</html>

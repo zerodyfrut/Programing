@@ -1,0 +1,47 @@
+sqlalchemy
+
+ORM(Object Relational Mapper) + SQL Expression Language 를 제공하는 라이브러리
+Python 객체를 데이터베이스 테이블과 매핑해서 SQL 없이도 DB를 다룰 수 있게 해줌.
+직접 SQL 쿼리를 작성해서 실행도 가능
+
+Engine: DB 연결을 관리, SQL 실행
+Session: DB와의 트랜잭션 단위, 객체 저장/조회/삭제 담당
+Base: ORM 모델의 상위 클래스. declarative_base()로 생성
+ORM 모델: Python 클래스와 DB 테이블을 연결. 필드를 컬럼으로 매핑
+Query: ORM 객체를 통해 DB 조회/검색
+
+
+
+Session 객체를 사용
+
+추가 / 삽입시 
+db.add(obj)              # 객체 하나 추가
+db.add_all([obj1, obj2]) # 여러 객체 추가
+db.commit()              # DB 반영
+db.flush()               # commit 전, SQL 실행
+db.refresh(obj)          # DB에서 최신값 불러오기
+
+조회 / 선택
+
+db.query(Model).all()                     # 모든 레코드
+db.query(Model).filter_by(field=value)    # 필터링
+db.query(Model).filter(Model.id == 1)     # 조건 필터
+db.query(Model).get(1)                    # PK로 조회 (deprecated)
+db.query(Model).first()                   # 첫 번째 레코드
+db.query(Model).count()                   # 개수
+db.query(Model).order_by(Model.id.desc()) # 정렬
+
+수정
+obj = db.query(Model).filter(Model.id == 1).first()
+obj.field = "새 값"
+db.commit()
+
+
+삭제
+obj = db.query(Model).filter(Model.id == 1).first()
+db.delete(obj)
+db.commit()
+
+
+스키마 클래스 이름은 마음대로 붙여도 됨 (NoteReq, NoteResp처럼 해도 돌아감)
+언제 실행되느냐는 엔드포인트 정의에서 타입 힌트와 response_model로 지정한 순간에 결정됨
