@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도서 수정</title>
+</head>
+<body>
+    <h1>도서 수정</h1>
+    <form action="/books/{{book.id}}/edit" method="post">
+        <label>제목 : <input type="text" name="title" required value="{{book.title}}"></label><br>
+        <label>저자 : <input type="text" name="author" required value="{{book.author}}"></label><br>
+        <label>출판년도 : <input type="number" name="year" required value="{{book.year}}"></label><br>
+        <button type="submit">수정하기</button>
+    </form>
+    <a href="/books/{{book.id}}">취소</a>
+</body>
+</html>
+
+

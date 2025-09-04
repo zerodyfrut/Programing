@@ -1,0 +1,67 @@
+@font-face {
+    font-family: "my";
+    src: url("my.TTF");
+}
+table{
+    margin-left: auto;      margin-right: auto;
+    background-color: #EEEEEE;
+    box-shadow: 3px 3px 3px black;
+    width: 400px;           font-family: "my";
+}
+th{
+    font-size: 35pt;        height: 80px;
+}
+.td1{
+    padding-left: 15px;    width: 50px;
+    height: 40px;           font-size: 15pt;
+}
+input, select, textarea{
+    outline: none;
+}
+.textType, .selectType{
+    font-family: "my";
+    width: 300px;       height: 35px;
+    border:none;
+    background-color: transparent;
+    border-bottom: black solid 2px;
+    font-size: 15pt;
+    text-align: center;
+}
+.textType:focus{
+    border-bottom: red solid 2px;
+}
+.textType::placeholder{
+    color: orange;
+}
+.btnType{
+    margin: 10px;
+    padding: 5px;
+    width: 80%;
+    font-size: 20pt;
+    font-family: "my";
+    font-weight: 900;
+}
+.taType{
+    resize: none;/* textarea 사용자가 사이즈 조절 못하게 */
+    font-family: "my";
+    width: 300px;       height: 150px;
+    border:black solid 2px;
+    background-color: transparent;
+    font-size: 15pt;
+}
+/* static/h1.css 추가 */
+h1 {
+    font-family: "my";
+    font-size: 30pt;
+    text-align: center;
+    color: blue; /* 원하는 색상 */
+}
+a {
+    font-family: "my";
+    font-size: 20pt;
+}
+img {
+    display: block;
+    margin: 20px auto;
+    max-width: 80%;
+}
