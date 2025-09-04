@@ -1,0 +1,21 @@
+도서 관리 앱 (미니 프로젝트)
+
+
+1. 책 등록
+제목(title), 저자(author), 출판년도(year)
+/books/new : 등록 폼
+/books/create : DB에 저장
+
+2. 책 목록 보기
+/books : 모든 책을 목록으로 표시
+테이블 형태 (id, 제목, 저자, 출판년도)
+
+3. 책 상세 보기
+/books/{id} : 특정 책의 상세 정보 출력
+
+4. 책 수정
+/books/edit/{id} : 수정 폼
+/books/update/{id} : DB 업데이트
+
+5. 책 삭제
+/books/delete/{id} : 해당 책 삭제
