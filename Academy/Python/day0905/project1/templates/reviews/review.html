@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>리뷰 등록</h1>
+    <form action="/reviews/create/{{book.id}}" method="post">
+        평점: <input type="number" name="rating" required max="5" min="0"><br>
+        한줄평: <input type="text" name="content" required><br>
+        <button type="submit">등록</button>
+    </form>
+    <a href="/books">목록으로</a>
+    <a href="/books/{{ book.id }}">돌아가기</a>
+</body>
+
+</html>

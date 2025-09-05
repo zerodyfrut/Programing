@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>도서 목록</title></head>
+<body>
+  <h1>도서 목록</h1>
+  <a href="/books/new">새 책 등록</a>
+  <table border="1">
+    <tr><th>ID</th><th>제목</th><th>저자</th><th>출판년도</th><th>액션</th></tr>
+    {% for entry in books %}
+    <tr>
+      <td>{{ entry.book.id }}</td>
+      <td><a href="/books/{{ entry.book.id }}">{{ entry.book.title }}</a>
+      {% if entry.avg_rating is not none %}
+        - 평균 평점 : {{entry.avg_rating}}
+      {% else %}
+        - 리뷰 없음
+      {% endif %}
+      </td>
+
+      <td>{{entry.book.author}}</td>
+      <td>{{entry.book.year}}</td>
+      <td>
+        <a href="/books/edit/{{ entry.book.id }}">수정</a> |
+        <a href="/books/delete/{{ entry.book.id }}">삭제</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
