@@ -1,0 +1,17 @@
+
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>책 수정</title></head>
+<body>
+  <h1>책 수정</h1>
+  <form action="/books/update/{{ book.id }}" method="post">
+    제목: <input type="text" name="title" value="{{ book.title }}"><br>
+    저자: <input type="text" name="author" value="{{ book.author }}"><br>
+    출판년도: <input type="number" name="year" value="{{ book.year }}"><br>
+    <button type="submit">수정</button>
+  </form>
+  <a href="/books">목록으로</a>
+</body>
+</html>
+

@@ -19,7 +19,10 @@ python -m venv fast_web
 fast_web\Scripts\activate
 pip install fastapi
 pip install uvicorn[standard]
-
+[실행]
+uvicorn 파일명:app --reload
+[종료]
+Ctrl + c
 
 
 [jinja2,python-multipart 설치] : HTML 템플릿 엔진, HTML <form>에서 파일 업로드를 처리할 때 필요
@@ -28,7 +31,7 @@ pip install jinja2 python-multipart
 
 
 [넘파이, 판다스, 맷플롯립, Seaborn]
-: 행렬 계산, 데이터프레임(표), 시각화(그래프, 차트 등), 고급 시각화(맵플롯립 기반), 대화형 그래프(확대 축소,범례 클릭 등)
+: 행렬 계산 / 데이터프레임(표) / 시각화(그래프, 차트 등) / 고급 시각화(맵플롯립 기반), 대화형 그래프(확대 축소,범례 클릭 등)
 python -m pip install --upgrade pip
 python -m pip install numpy pandas matplotlib
 pip install seaborn
@@ -87,6 +90,6 @@ pip install folium
 pip install pymysql
 
 
-[SQLAlchemy] :ython에서 DB를 객체지향적으로 다룰 수 있게 해주는 ORM/DB 툴
+[SQLAlchemy] : Python에서 DB를 객체지향적으로 다룰 수 있게 해주는 ORM/DB 툴
 pip install sqlalchemy
 
