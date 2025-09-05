@@ -1,0 +1,347 @@
+pip install fastapi uvicorn "sqlalchemy>=1.4" pymysql jinja2 python-multipart python-jose[cryptography] passlib[bcrypt]
+
+[database.py]
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+# MySQL 연결 정보
+DATABASE_URL = "mysql+pymysql://pytest:pytest@localhost:3306/memo_app"
+            # mysql+pymysql://계정:비번@DB호스트:포트/데이터베이스명
+
+engine = create_engine(DATABASE_URL, echo=False,
+    pool_pre_ping=True,
+    future=True,) # DB와 실제로 통신하는 객체
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine) # DB와 상호작용할 세션(Session) 생성
+                                                                            # autocommit=False → commit 수동 처리    
+                                                                            # autoflush=False → 변경사항 DB반영 비활성화
+
+Base = declarative_base() #ORM 모델 클래스의 공통 부모
+
+[models.py]
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric
+from sqlalchemy.orm import relationship
+from database import Base
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    items = relationship("Item", back_populates="owner", cascade="all, delete-orphan")
+
+class Item(Base):
+    __tablename__ = "items"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    price = Column(Numeric(10,2), nullable=False)
+    is_offer = Column(String(5), nullable=True)  # "true" / None (간단화)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    owner = relationship("User", back_populates="items")
+
+
+
+[auth.py]
+
+# (JWT & 비밀번호 해시 + 쿠키 유틸)
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+from jose import jwt, JWTError
+from passlib.context import CryptContext
+from fastapi import Request
+
+SECRET_KEY = "change-this-to-very-secret"  # 실제 환경에서는 환경변수로!
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
+
+def create_access_token(sub: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    payload = {"sub": sub, "exp": expire}
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def decode_token(token: str) -> Optional[dict]:
+    try:
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        return None
+
+# 쿠키에서 bearer 토큰 꺼내기 (dev 용, HttpOnly)
+COOKIE_NAME = "access_token"
+
+def get_token_from_request(request: Request) -> Optional[str]:
+    token = request.cookies.get(COOKIE_NAME)
+    # "Bearer xxx" 형태로 저장했다면 접두어 제거
+    if token and token.lower().startswith("bearer "):
+        return token.split(" ", 1)[1]
+    return token
+
+[app.py]
+
+
+# app.py
+from fastapi import FastAPI, Depends, Request, Form, HTTPException, status, Response
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
+import os
+
+from database import Base, engine, SessionLocal
+import models
+from project1.schemas import UserCreate, ItemIn
+import project1.auth as auth
+
+# --- 앱/템플릿/정적파일 ---
+app = FastAPI()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+if os.path.isdir(os.path.join(BASE_DIR, "static")):
+    app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+
+# --- DB 테이블 생성 ---
+Base.metadata.create_all(bind=engine)
+
+# --- DB 세션 의존성 ---
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# --- 현재 유저 의존성 (쿠키 기반) ---
+def get_current_user(request: Request, db: Session = Depends(get_db)) -> models.User:
+    token = auth.get_token_from_request(request)
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    payload = auth.decode_token(token)
+    if not payload or "sub" not in payload:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    user = db.query(models.User).filter(models.User.id == int(payload["sub"])).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    return user
+
+# --- 홈: 로그인 페이지로 리다이렉트 ---
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return RedirectResponse(url="/login", status_code=302)
+
+# --- 회원가입 폼 ---
+@app.get("/register", response_class=HTMLResponse)
+def register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request, "title": "회원가입"})
+
+# --- 회원가입 처리 ---
+@app.post("/register", response_class=HTMLResponse)
+def register(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    exists = db.query(models.User).filter(models.User.username == username).first()
+    if exists:
+        return templates.TemplateResponse(
+            "register.html",
+            {"request": request, "title": "회원가입", "error": "이미 존재하는 사용자명입니다."},
+            status_code=400,
+        )
+    user = models.User(username=username, hashed_password=auth.hash_password(password))
+    db.add(user)
+    db.commit()
+    return RedirectResponse(url="/login?registered=1", status_code=303)
+
+# --- 로그인 폼 ---
+@app.get("/login", response_class=HTMLResponse)
+def login_page(request: Request, registered: int | None = None):
+    return templates.TemplateResponse(
+        "login.html",
+        {"request": request, "title": "로그인", "registered": registered},
+    )
+
+# --- 로그인 처리: JWT를 HttpOnly 쿠키에 저장 ---
+@app.post("/login")
+def login(
+    response: Response,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user or not auth.verify_password(password, user.hashed_password):
+        return RedirectResponse(url="/login?error=1", status_code=303)
+    token = auth.create_access_token(str(user.id))
+    # HttpOnly 쿠키 설정
+    response = RedirectResponse(url="/items", status_code=303)
+    response.set_cookie(
+        key=auth.COOKIE_NAME,
+        value=f"Bearer {token}",
+        httponly=True,
+        secure=False,  # 로컬 http 개발이면 False, https면 True
+        samesite="lax",
+        max_age=60 * 60,
+    )
+    return response
+
+# --- 로그아웃: 쿠키 삭제 ---
+@app.post("/logout")
+def logout():
+    resp = RedirectResponse(url="/login", status_code=303)
+    resp.delete_cookie(auth.COOKIE_NAME)
+    return resp
+
+# --- 아이템 목록 + 생성 폼 (로그인 필요) ---
+@app.get("/items", response_class=HTMLResponse)
+def items_page(request: Request, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+    items = db.query(models.Item).filter(models.Item.owner_id == user.id).order_by(models.Item.id.desc()).all()
+    return templates.TemplateResponse(
+        "items.html",
+        {"request": request, "title": "내 아이템", "user": user, "items": items},
+    )
+
+# --- 폼으로 Item 생성 ---
+@app.post("/items")
+def create_item_from_form(
+    request: Request,
+    name: str = Form(...),
+    price: float = Form(...),
+    is_offer: str | None = Form(None),  # "true" or ""
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
+    item = models.Item(
+        name=name,
+        price=price,
+        is_offer="true" if (is_offer and is_offer.lower() == "true") else None,
+        owner_id=user.id,
+    )
+    db.add(item)
+    db.commit()
+    return RedirectResponse(url="/items", status_code=303)
+
+
+----------------static -----------------------
+[style.css]
+
+body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 16px; }
+nav a { margin-right: 12px; }
+.card { display: grid; gap: 8px; max-width: 420px; margin-bottom: 24px; }
+.card input, .card select { padding: 8px; border: 1px solid #ddd; border-radius: 8px; }
+.card button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+.list { list-style: none; padding: 0; display: grid; gap: 10px; }
+.item { border: 1px solid #eee; padding: 12px; border-radius: 10px; }
+.empty { color: #888; }
+
+
+-----------------templates------------------------
+[base.html]
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ title or "FastAPI App" }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>{{ title or "FastAPI App" }}</h1>
+    <nav>
+      <a href="/items">Items</a>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+      <form method="post" action="/logout" style="display:inline">
+        <button type="submit">Logout</button>
+      </form>
+    </nav>
+    <hr/>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer><small>Powered by FastAPI ⚡</small></footer>
+</body>
+</html>
+
+[register.html]
+
+
+{% extends "base.html" %}
+{% block content %}
+  {% if error %}
+    <p style="color:red">{{ error }}</p>
+  {% endif %}
+  <form method="post" action="/register" class="card">
+    <label>아이디 <input name="username" required></label>
+    <label>비밀번호 <input name="password" type="password" required></label>
+    <button type="submit">회원가입</button>
+  </form>
+{% endblock %}
+
+
+[login.html]
+
+{% extends "base.html" %}
+{% block content %}
+  {% if request.query_params.get('error') %}
+    <p style="color:red">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+  {% endif %}
+  {% if registered %}
+    <p style="color:green">회원가입이 완료되었습니다. 로그인하세요.</p>
+  {% endif %}
+  <form method="post" action="/login" class="card">
+    <label>아이디 <input name="username" required></label>
+    <label>비밀번호 <input name="password" type="password" required></label>
+    <button type="submit">로그인</button>
+  </form>
+{% endblock %}
+
+
+
+[items.html]
+
+{% extends "base.html" %}
+{% block content %}
+  <p>안녕하세요, <strong>{{ user.username }}</strong> 님 </p>
+
+  <h2>아이템 추가</h2>
+  <form method="post" action="/items" class="card">
+    <label>이름 <input name="name" required></label>
+    <label>가격 <input name="price" type="number" step="0.01" required></label>
+    <label>할인 여부
+      <select name="is_offer">
+        <option value="">없음</option>
+        <option value="true">할인</option>
+      </select>
+    </label>
+    <button type="submit">등록</button>
+  </form>
+
+  <h2>내 아이템</h2>
+  <ul class="list">
+    {% for it in items %}
+      <li class="item">
+        <strong>#{{ it.id }} {{ it.name }}</strong>
+        <div>가격: {{ "%.2f"|format(it.price) }}</div>
+        <div>할인 여부: {{ "예" if it.is_offer else "아니오" }}</div>
+      </li>
+    {% else %}
+      <li class="empty">아직 아이템이 없어요.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+

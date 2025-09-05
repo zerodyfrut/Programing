@@ -1,0 +1,275 @@
+Books 연습문제 - 리뷰 추가
+
+[model.py]
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric
+from sqlalchemy.orm import relationship
+from database import Base
+
+class Book(Base):
+    __tablename__ = "books"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(50), unique=True, nullable=False, index=True)
+    author = Column(String(255), nullable=False)
+    year = Column(Integer, nullable=True)
+       # 관계 설정 (Book : Review = 1 : Many)
+    reviews = relationship("Review", back_populates="book", cascade="all, delete-orphan")
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(String(255), nullable=False)
+    rating = Column(Integer, nullable=False)
+    book_id = Column(Integer, ForeignKey("books.id"))
+
+    # 역참조
+    book = relationship("Book", back_populates="reviews")
+
+
+[app.py 추가]
+
+# app.py
+from fastapi import FastAPI, Depends, Request, Form, HTTPException, status, Response
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
+import os
+
+from database import Base, engine, SessionLocal
+import models
+
+
+# --- 앱/템플릿/정적파일 ---
+app = FastAPI()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+
+# --- DB 테이블 생성 ---
+Base.metadata.create_all(bind=engine)
+
+# --- DB 세션 의존성 ---
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# 1. 책 목록(평점 평균 출력)
+@app.get("/books", response_class=HTMLResponse)
+def list_books(request: Request, db: Session = Depends(get_db)):
+    books = db.query(models.Book).all()
+    book_data = []
+    for book in books:
+        reviews = book.reviews
+        avg_rating = round(sum(r.rating for r in reviews)/len(reviews),1) if reviews else None
+        book_data.append({"book": book, "avg_rating": avg_rating})
+
+    return templates.TemplateResponse("books/list.html", {"request": request, "books": book_data})
+
+# 2. 책 등록 폼
+@app.get("/books/new", response_class=HTMLResponse)
+def new_book_form(request: Request):
+    return templates.TemplateResponse("books/new.html", {"request": request})
+
+# 3. 책 생성
+@app.post("/books/create")
+def create_book(
+    title: str = Form(...),
+    author: str = Form(...),
+    year: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    book = models.Book(title=title, author=author, year=year)
+    db.add(book)
+    db.commit()
+    return RedirectResponse(url="/books", status_code=303)
+
+# 4. 책 상세 보기
+@app.get("/books/{book_id}", response_class=HTMLResponse)
+def detail_book(book_id: int, request: Request, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return templates.TemplateResponse("books/detail.html", {"request": request, "book": book})
+
+# 5. 책 수정 폼
+@app.get("/books/edit/{book_id}", response_class=HTMLResponse)
+def edit_book_form(book_id: int, request: Request, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return templates.TemplateResponse("books/edit.html", {"request": request, "book": book})
+
+# 6. 책 업데이트
+@app.post("/books/update/{book_id}")
+def update_book(
+    book_id: int,
+    title: str = Form(...),
+    author: str = Form(...),
+    year: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    book.title = title
+    book.author = author
+    book.year = year
+    db.commit()
+    return RedirectResponse(url="/books", status_code=303)
+
+# 7. 책 삭제
+@app.get("/books/delete/{book_id}")
+def delete_book(book_id: int, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    db.delete(book)
+    db.commit()
+    return RedirectResponse(url="/books", status_code=303)
+
+# 리뷰 파트 추가
+@app.get("/books/{book_id}/reviews/new", response_class=HTMLResponse)
+def new_review_form(book_id: int, request: Request, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return templates.TemplateResponse("books/review_form.html", {"request": request, "book": book, 'book_id':book_id})
+
+@app.post("/books/{book_id}/reviews/create")
+def create_review(
+    book_id: int,
+    content: str = Form(...),
+    rating: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    review = models.Review(content=content, rating=rating, book_id=book_id)
+    db.add(review)
+    db.commit()
+    return RedirectResponse(url=f"/books/{book_id}", status_code=303)
+
+@app.get("/reviews/{review_id}/edit", response_class=HTMLResponse)
+def edit_review_form(review_id: int, request: Request, db: Session = Depends(get_db)):
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    return templates.TemplateResponse("books/review_form.html", {"request": request, "review": review})
+
+@app.post("/reviews/{review_id}/update")
+def update_review(review_id: int, rating: int = Form(...), content: str = Form(...), db: Session = Depends(get_db)):
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    review.rating = rating
+    review.content = content
+    db.commit()
+    return RedirectResponse(f"/books/{review.book_id}", status_code=303)
+
+@app.get("/reviews/{review_id}/delete")
+def delete_review(review_id: int, db: Session = Depends(get_db)):
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    book_id = review.book_id
+    db.delete(review)
+    db.commit()
+    return RedirectResponse(f"/books/{book_id}", status_code=303)
+
+
+
+[list.html]변경
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>도서 목록</title></head>
+<body>
+  <h1>도서 목록</h1>
+  <a href="/books/new">새 책 등록</a>
+  <table border="1">
+    <tr><th>ID</th><th>제목</th><th>저자</th><th>출판년도</th><th>액션</th></tr>
+    {% for entry in books %}
+    <tr>
+      <td>{{ entry.book.id }}</td>
+      <td><a href="/books/{{ entry.book.id }}">{{ entry.book.title }}</a>
+         {% if entry.avg_rating is not none %}
+            - 평균 평점: {{ entry.avg_rating }}
+        {% else %}
+            - 리뷰 없음
+        {% endif %}
+    
+    </td>
+      <td>{{ entry.book.author }}</td>
+      <td>{{ entry.book.year }}</td>
+      <td>
+        <a href="/books/edit/{{ entry.book.id }}">수정</a>
+        <a href="/books/delete/{{ entry.book.id }}">삭제</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
+
+
+[detail.html] 변경
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>책 상세</title></head>
+<body>
+  <h1>{{ book.title }}</h1>
+  <p>저자: {{ book.author }}</p>
+  <p>출판년도: {{ book.year }}</p>
+
+  <h2> 리뷰</h2>
+  <ul>
+    {% for review in book.reviews %}
+      <li>{{ review.rating }}점 - {{ review.content }}
+        {#수정 삭제#}
+          <a href="/reviews/{{review.id}}/edit">리뷰 수정</a>
+          <a href="/reviews/{{review.id}}/delete">리뷰 삭제</a>
+      </li>
+    {% else %}
+      <li>아직 리뷰가 없습니다.</li>
+    {% endfor %}
+  </ul>
+
+  <a href="/books/{{ book.id }}/reviews/new">리뷰 작성하기</a><br>
+  <a href="/books">목록으로</a>
+</body>
+</html>
+
+
+
+
+[review_form.html] 
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>리뷰 작성</title></head>
+<body>
+<h1>{% if review %}리뷰 수정{% else %}리뷰 작성{% endif %}</h1>
+<form method="post" action="{% if review %}/reviews/{{ review.id }}/update{% else %}/books/{{ book_id }}/reviews/create{% endif %}">
+    평점: <input type="number" name="rating" min="1" max="5" value="{{ review.rating if review else 5 }}"><br>
+    내용: <textarea name="content">{{ review.content if review else '' }}</textarea><br>
+    <button type="submit">제출</button>
+</form>
+
+{% if review %}
+    <a href="/reviews/{{ review.id }}/delete">삭제</a>
+{% else %}
+  <a href="/books/{{ book.id }}">책 상세로</a>
+{% endif %}
+</body>
+</html>
+
+
+

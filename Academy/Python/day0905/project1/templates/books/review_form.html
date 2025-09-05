@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 작성</title>
+</head>
+
+<body>
+    <h1>
+        {% if review %}
+        리뷰 수정
+        {% else %}
+        리뷰 작성
+        {% endif %}
+    </h1>
+    <form action="{% if review %}/reviews/{{review.id}}/update
+    {% else %}/books/{{book_id}}/reviews/create{% endif %}" method="post">
+        평점 : <input type="number" name="rating" min="1" max="5" value="{{review.rating if review else 5}}"><br>
+        내용 : <textarea name="content">{{review.content if review else ""}}</textarea><br>
+        <button type="submit">제출</button>
+    </form>
+
+    {% if review %}
+    <a href="/reviews/{{review.id}}/delete">삭제</a>
+    {% else %}
+    <a href="/books/{{book.id}}">책 상세로</a>
+    {% endif %}
+
+</body>
+
+</html>
