@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>책 상세</title>
+</head>
+
+<body>
+  <h1>{{ book.title }}</h1>
+  <p>저자: {{ book.author }}</p>
+  <p>출판년도: {{ book.year }}</p>
+
+  <h2> 리뷰 </h2>
+  <ul>
+    {% for review in book.reviews %}
+    <li>{{review.rating}}점 -{{review.content}}
+      {#수정 삭제#}  <!--이것도 {# #}도 주석-->
+      <a href="/reviews/{{review.id}}/edit">리뷰 수정</a>
+      <a href="/reviews/{{review.id}}/delete">리뷰 삭제</a>
+    </li>
+    {% else %} {# jinja2 문법 : for 반복시 수행 else 반복이 한번도 수행되지 않았을 떄 실행 #}
+    <li>아직 리뷰가 없습니다.</li>
+    {% endfor %}
+  </ul>
+
+  <a href="/books/{{book.id}}/reviews/new">리뷰 작성하기</a><br>
+  <a href="/books">목록으로</a>
+
+</body>
+
+</html>

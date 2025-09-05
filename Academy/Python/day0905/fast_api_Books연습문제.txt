@@ -1,0 +1,251 @@
+도서 관리 앱 (미니 프로젝트)
+
+1. 책 등록
+제목(title), 저자(author), 출판년도(year)
+/books/new : 등록 폼
+/books/create : DB에 저장
+
+2. 책 목록 보기
+/books : 모든 책을 목록으로 표시
+테이블 형태 (id, 제목, 저자, 출판년도)
+
+3. 책 상세 보기
+/books/{id} : 특정 책의 상세 정보 출력
+
+4. 책 수정
+/books/edit/{id} : 수정 폼
+/books/update/{id} : DB 업데이트
+
+5. 책 삭제
+/books/delete/{id} : 해당 책 삭제
+
+
+Books 
+
+[database.py]
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+# MySQL 연결 정보
+DATABASE_URL = "mysql+pymysql://pytest:pytest@localhost:3306/memo_app"
+            # mysql+pymysql://계정:비번@DB호스트:포트/데이터베이스명
+
+engine = create_engine(DATABASE_URL, echo=False,
+    pool_pre_ping=True,
+    future=True,) # DB와 실제로 통신하는 객체
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine) # DB와 상호작용할 세션(Session) 생성
+                                                                            # autocommit=False → commit 수동 처리    
+                                                                            # autoflush=False → 변경사항 DB반영 비활성화
+
+Base = declarative_base() #ORM 모델 클래스의 공통 부모
+
+
+[models.py]
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric
+from sqlalchemy.orm import relationship
+from database import Base
+
+class Book(Base):
+    __tablename__ = "books"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(50), unique=True, nullable=False, index=True)
+    author = Column(String(255), nullable=False)
+    year = Column(Integer, nullable=True)
+
+
+[app.py]
+
+# app.py
+from fastapi import FastAPI, Depends, Request, Form, HTTPException, status, Response
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
+import os
+
+from database import Base, engine, SessionLocal
+import models
+
+
+# --- 앱/템플릿/정적파일 ---
+app = FastAPI()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+
+# --- DB 테이블 생성 ---
+Base.metadata.create_all(bind=engine)
+
+# --- DB 세션 의존성 ---
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# 1. 책 목록
+@app.get("/books", response_class=HTMLResponse)
+def list_books(request: Request, db: Session = Depends(get_db)):
+    books = db.query(models.Book).all()
+    return templates.TemplateResponse("books/list.html", {"request": request, "books": books})
+
+# 2. 책 등록 폼
+@app.get("/books/new", response_class=HTMLResponse)
+def new_book_form(request: Request):
+    return templates.TemplateResponse("books/new.html", {"request": request})
+
+# 3. 책 생성
+@app.post("/books/create")
+def create_book(
+    title: str = Form(...),
+    author: str = Form(...),
+    year: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    book = models.Book(title=title, author=author, year=year)
+    db.add(book)
+    db.commit()
+    return RedirectResponse(url="/books", status_code=303)
+
+# 4. 책 상세 보기
+@app.get("/books/{book_id}", response_class=HTMLResponse)
+def detail_book(book_id: int, request: Request, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return templates.TemplateResponse("books/detail.html", {"request": request, "book": book})
+
+# 5. 책 수정 폼
+@app.get("/books/edit/{book_id}", response_class=HTMLResponse)
+def edit_book_form(book_id: int, request: Request, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return templates.TemplateResponse("books/edit.html", {"request": request, "book": book})
+
+# 6. 책 업데이트
+@app.post("/books/update/{book_id}")
+def update_book(
+    book_id: int,
+    title: str = Form(...),
+    author: str = Form(...),
+    year: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    book.title = title
+    book.author = author
+    book.year = year
+    db.commit()
+    return RedirectResponse(url="/books", status_code=303)
+
+# 7. 책 삭제
+@app.get("/books/delete/{book_id}")
+def delete_book(book_id: int, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    db.delete(book)
+    db.commit()
+    return RedirectResponse(url="/books", status_code=303)
+
+
+
+-------------- templates/books -----------------------
+[list.html]
+
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>도서 목록</title></head>
+<body>
+  <h1>도서 목록</h1>
+  <a href="/books/new">새 책 등록</a>
+  <table border="1">
+    <tr><th>ID</th><th>제목</th><th>저자</th><th>출판년도</th><th>액션</th></tr>
+    {% for book in books %}
+    <tr>
+      <td>{{ book.id }}</td>
+      <td><a href="/books/{{ book.id }}">{{ book.title }}</a></td>
+      <td>{{ book.author }}</td>
+      <td>{{ book.year }}</td>
+      <td>
+        <a href="/books/edit/{{ book.id }}">수정</a>
+        <a href="/books/delete/{{ book.id }}">삭제</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
+
+
+
+[news.html]
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>새 책 등록</title></head>
+<body>
+  <h1>새 책 등록</h1>
+  <form action="/books/create" method="post">
+    제목: <input type="text" name="title"><br>
+    저자: <input type="text" name="author"><br>
+    출판년도: <input type="number" name="year"><br>
+    <button type="submit">등록</button>
+  </form>
+  <a href="/books">목록으로</a>
+</body>
+</html>
+
+
+[detail.html]
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>책 상세</title></head>
+<body>
+  <h1>{{ book.title }}</h1>
+  <p>저자: {{ book.author }}</p>
+  <p>출판년도: {{ book.year }}</p>
+  <a href="/books">목록으로</a>
+</body>
+</html>
+
+
+[edit.html]
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>책 수정</title></head>
+<body>
+  <h1>책 수정</h1>
+  <form action="/books/update/{{ book.id }}" method="post">
+    제목: <input type="text" name="title" value="{{ book.title }}"><br>
+    저자: <input type="text" name="author" value="{{ book.author }}"><br>
+    출판년도: <input type="number" name="year" value="{{ book.year }}"><br>
+    <button type="submit">수정</button>
+  </form>
+  <a href="/books">목록으로</a>
+</body>
+</html>
+
+
+
+# 실행은 app.py파일이 위치한 곳에서 uvicorn app:app --reload 실행
+
+
+
+
+
+
+
+
+
+

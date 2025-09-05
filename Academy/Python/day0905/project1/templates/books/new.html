@@ -1,0 +1,16 @@
+
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>새 책 등록</title></head>
+<body>
+  <h1>새 책 등록</h1>
+  <form action="/books/create" method="post">
+    제목: <input type="text" name="title" required><br>
+    저자: <input type="text" name="author"required><br>
+    출판년도: <input type="number" name="year" required><br>
+    <button type="submit">등록</button>
+  </form>
+  <a href="/books">목록으로</a>
+</body>
+</html>
