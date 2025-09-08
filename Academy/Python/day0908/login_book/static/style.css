@@ -1,0 +1,9 @@
+
+body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 16px; }
+nav a { margin-right: 12px; }
+.card { display: grid; gap: 8px; max-width: 420px; margin-bottom: 24px; }
+.card input, .card select { padding: 8px; border: 1px solid #ddd; border-radius: 8px; }
+.card button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+.list { list-style: none; padding: 0; display: grid; gap: 10px; }
+.item { border: 1px solid #eee; padding: 12px; border-radius: 10px; }
+.empty { color: #888; }

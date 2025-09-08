@@ -25,6 +25,11 @@ uvicorn 파일명:app --reload
 Ctrl + c
 
 
+[JWT 관련]
+pip install fastapi uvicorn "sqlalchemy>=1.4" pymysql jinja2 python-multipart python-jose[cryptography] passlib[bcrypt]
+
+
+
 [jinja2,python-multipart 설치] : HTML 템플릿 엔진, HTML <form>에서 파일 업로드를 처리할 때 필요
 pip install jinja2 python-multipart
 
