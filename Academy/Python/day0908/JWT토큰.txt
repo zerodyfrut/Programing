@@ -1,0 +1,60 @@
+- JWT
+JSON 형식의 데이터를 안전하게 주고 받기위한 토큰 규격
+인증(authentication)과 권한 부여(Authorization)에 사용
+
+사용자가 로그인시 서버가 JWT 발급
+이후 사용자는 요청을 보낼때마다 JWT를 함께 전송
+- 서버는 JWT를 받아서 검증(로그인된 사용자)
+
+
+-JWT 구조
+
+JWT(Json Web Token)는 크게 3부분으로 나뉩니다.
+
+HEADER . PAYLOAD . SIGNATURE
+
+
+Header: 토큰 타입(JWT)과 해싱 알고리즘(HS256, RS256 등)
+    ex. {"alg":"HS256,"typ":"JWT"}
+
+Payload: 실제 담고 싶은 데이터(Claims) - 사용자 ID, 권한, 만료시간
+    개발자가 원하는대로 만듦(예약 키워드 추천)
+
+Signature: 토큰 위조 여부 검증용 서명
+    자동으로 생성됨
+
+- Payload (페이로드)
+
+Payload는 JWT 안에서 사용자와 관련된 정보, 권한, 만료 시간 등을 담는 부분입니다.
+Base64로 인코딩되어 있지만, 암호화(encryption)된 건 아니기 때문에 누구나 디코딩해서 볼 수 있어요.
+(따라서 민감한 정보(비밀번호, 주민번호 등)는 절대 넣으면 안 됨!)
+
+1. Registered Claims (표준으로 예약된 Claim)
+
+JWT 스펙에서 권장하는 예약 키워드들:
+
+iss : 발급자(issuer)
+sub : 토큰 주체(subject, 예: user ID)
+aud : 대상자(audience, 보통 클라이언트 앱)
+exp : 만료 시간(expiration)
+nbf : Not Before (이 시간 전에는 유효하지 않음)
+iat : 발급 시간(issued at)
+jti : 토큰 식별자 (JWT ID, unique identifier)
+
+
+예시 Payload(JSON)
+{
+  "sub": "42",
+  "name": "nia",
+  "role": "admin",
+  "iat": 1690000000,
+  "exp": 1690003600
+}
+
+전체 흐름
+
+1. 로그인 폼 제출 → /login POST
+2. 인증 성공 → JWT 생성 → HttpOnly 쿠키에 저장 → /items로 303 리다이렉트
+3. 로그아웃 → /logout POST → 쿠키 삭제 → /login로 303 리다이렉트
+4. 보호된 API 접근 시 get_token_from_request(request) + decode_token(token) 사용
+

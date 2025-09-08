@@ -1,0 +1,15 @@
+
+{% extends "base.html" %}
+{% block content %}
+  {% if request.query_params.get('error') %}
+    <p style="color:red">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+  {% endif %}
+  {% if registered %}
+    <p style="color:green">회원가입이 완료되었습니다. 로그인하세요.</p>
+  {% endif %}
+  <form method="post" action="/login" class="card">
+    <label>아이디 <input name="username" required></label>
+    <label>비밀번호 <input name="password" type="password" required></label>
+    <button type="submit">로그인</button>
+  </form>
+{% endblock %}
