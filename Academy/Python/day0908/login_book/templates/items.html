@@ -1,0 +1,33 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <p>안녕하세요, <strong>{{ user.username }}</strong> 님 </p>
+
+  <h2>아이템 추가</h2>
+  <form method="post" action="/items" class="card">
+    <label>이름 <input name="name" required></label>
+    <label>가격 <input name="price" type="number" step="0.01" required></label>
+    <label>할인 여부
+      <select name="is_offer">
+        <option value="">없음</option>
+        <option value="true">할인</option>
+      </select>
+    </label>
+    <button type="submit">등록</button>
+  </form>
+
+  <h2>내 아이템</h2>
+  <ul class="list">
+    {% for it in items %}
+      <li class="item">
+        <strong>#{{ it.id }} {{ it.name }}</strong>
+        <div>가격: {{ "%.2f"|format(it.price) }}</div>
+        <div>할인 여부: {{ "예" if it.is_offer else "아니오" }}</div>
+      </li>
+    {% else %}
+      <li class="empty">아직 아이템이 없어요.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+
