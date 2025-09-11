@@ -1,0 +1,228 @@
+[이수진] [오전 9:44] * Elasticsearch란
+
+-JSON 기반 문서를 저장·검색·분석할 수 있는 분산형 오픈소스 검색엔진
+로그 분석부터 서비스 검색 기능까지 광범위하게 쓰이는 플랫폼
+
+-Lucene(Apache Lucene) 기반으로 만들어진 검색·분석 엔진
+
+-JSON 문서(Document)를 저장하고, 이를 역색인(Inverted Index) 방식으로 색인해 빠른 검색과 분석 가능
+
+-RESTful API 기반으로 HTTP 요청/응답(JSON)으로 사용
+
+* 주요 특징
+
+풀텍스트 검색(Full-text Search)
+자연어 검색, 형태소 분석, 오타 교정, 유사도 점수 기반 검색 지원
+
+분산 구조(Scalable & Distributed)
+데이터를 자동으로 여러 샤드(shard)에 분산 저장
+
+노드를 추가하면 수평 확장(Scale-out) 가능
+실시간 분석
+
+집계(Aggregation) 기능으로 통계/분석을 실시간 수행
+로그, 센서 데이터, 비즈니스 데이터 분석에 활용
+
+REST API 지원
+...
+[이수진] [오전 11:42] PUT book
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "author": {
+        "type": "keyword"
+      },
+      "price": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+
+...
+[이수진] [오후 12:04] from fastapi import FastAPI, Depends
+from contextlib import asynccontextmanager
+from elasticsearch import AsyncElasticsearch
+#pip install "elasticsearch[async]"
+
+#앱의 생명주기 전체를 감싸는 컨텍스트 매니저
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup: 리소스 초기화
+    es_client = AsyncElasticsearch("http://localhost:9200")
+    app.state.es_client = es_client
+    print("Elasticsearch 연결됨")
+    #yield 앞 부분은 앱 시작 시 실행 (startup)
+    yield  # <-- 여기서 앱이 실행됨
+    #yield 뒤 부분은 앱 종료 시 실행 (shutdown)
+    ...
+[이수진] [오후 12:10] POST /{index}/_update/{_id}
+{
+  "doc": {
+    "field": "new_value"
+  }
+}
+[이수진] [오후 12:54] {
+  "event_name": "추석 할인",
+  "event_period": {
+    "gte": "2025-09-01",
+    "lte": "2025-09-15"
+  }
+[이수진] [오후 1:00] PUT snack
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "maker": {
+        "type": "keyword"
+      },
+      "price": {
+        "type": "integer"
+      },
+      "weight": {
+        "type": "double"
+      }
+    }
+  }
+}
+
+PUT snack/_doc/1
+{
+  "name": "새우깡", "maker": "농심", "price": 3000, "weight": 200
+}
+PUT snack/_doc/2
+{
+  "name": "노래방새우깡", "maker": "농심", "price": 5000, "weight": 1000
+}
+PUT snack/_doc/3
+{
+  "name": "양파링", "maker": "농심", "price": 3300, "w...
+[이수진] [오후 2:35] 정확성·트랜잭션이 중요한 경우 → RDB
+
+검색·분석·실시간 대용량 처리가 중요한 경우 → Elasticsearch
+[이수진] [오후 2:51] PUT snack/_doc/7
+{
+  "name": "크라운 새콤달콤 딸기", "maker": "오리온", "price": 500, "weight": 200
+}
+PUT snack/_doc/8
+{
+  "name": "크라운 새콤달콤 딸기 레몬", "maker": "오리온", "price": 500, "weight": 200
+}
+PUT snack/_doc/9
+{
+  "name": "크라운 새콤달콤 포도 레몬", "maker": "오리온", "price": 500, "weight": 200
+}
+[이수진] [오후 2:57] GET /snack/_search
+{
+  "query": {
+    "match": {
+      "name": {
+        "query": "크라운 딸기",
+        "operator": "and"
+      }
+    }
+  }
+}
+[이수진] [오후 2:59] match : 단어 기반 검색
+text 필드에 대해 분석기(analyzer)를 적용해서 토큰화한 뒤 검색
+일반적인 키워드 검색, 문장 검색에 적합
+정확히 일치하는 값보다는 자연어 검색 느낌에 가까움
+여러 단어 검색
+예시) 상품명, 설명 → match
+
+[이수진] [오후 3:07] PUT book
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "author": {
+        "type": "keyword"
+      },
+      "price": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+GET book
+# 인덱스/_doc/_id값
+PUT book/_doc/1
+{"title":"엘라스틱1",
+"author":"김스캇",
+"price":10000
+}
+[이수진] [오후 4:14] PUT keyword_test_index
+{
+  "mappings": {
+    "properties": {
+      "txt1": {
+        "type": "text"
+      },
+      "txt2": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+[이수진] [오후 4:14] put keyword_test_index/_doc/1
+{
+  "txt1":"I am a boy",
+  "txt2": "I am a boy"
+}
+
+[이수진] [오후 4:14] POST keyword_test_index/_search
+{
+  "query": {
+    "match": {
+      "txt1": "I am"
+    }
+  }
+}
+[이수진] [오후 4:14] POST keyword_test_index/_search
+{
+  "query": {
+    "match": {
+      "txt2": "I am"
+    }
+  }
+}
+[이수진] [오후 4:15] POST keyword_test_index/_search
+{
+  "query": {
+    "term": {
+      "txt1": "I am a boy"
+    }
+  }
+}
+[이수진] [오후 4:15] POST keyword_test_index/_search
+{
+  "query": {
+    "term": {
+      "txt2": "I am a boy"
+    }
+  }
+}
+
+
+
+엘라스틱 서치 -> 검색 결과를 얼마나 관련 있는지 평가(_score) : 점수를 매김
+'초콜릿'
+-> 달콤한 초콜릿 과자
+-> 초콜릿향 과자
+관련도 : match, must 같은 퀘리는 기본적으로 관련도계산(Scoring)을 수행
+
+관련성이 없어도 되는경우
+filter
+> 500보다 작거나 같다.
+450원
+500원
+-> 이런건 관련도 계산이 필요없기에, 더 속도가 빠른 filter를 사용하는게 유리
