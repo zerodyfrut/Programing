@@ -1,0 +1,430 @@
+PUT snack
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text"  
+      },
+      "maker": {
+        "type": "keyword"
+      },
+      "price": {
+        "type": "integer"
+      },
+      "weight": {
+        "type": "double"
+      }
+    }
+  }
+}
+
+PUT snack/_doc/1
+{
+  "name": "새우깡", "maker": "농심", "price": 3000, "weight": 200
+}
+PUT snack/_doc/2
+{
+  "name": "노래방새우깡", "maker": "농심", "price": 5000, "weight": 1000
+}
+PUT snack/_doc/3
+{
+  "name": "양파링", "maker": "농심", "price": 3300, "weight": 220
+}
+PUT snack/_doc/4
+{
+  "name": "맛동산", "maker": "해태", "price": 2300, "weight": 150
+}
+PUT snack/_doc/5
+{
+  "name": "포카칩", "maker": "오리온", "price": 5300, "weight": 100
+}
+PUT snack/_doc/6
+{
+  "name": "썬칩", "maker": "오리온", "price": 3000, "weight": 200
+}
+
+GET /snack/_search
+GET /_cat/indices
+
+
+GET /snack/_search?q=값
+GET /snack/_search?q=필드명:값
+
+GET /snack/_search?sort=price
+GET /snack/_search?sort=price:desc
+GET /snack/_search?sort=maker:asc,price:desc
+
+# text 타입 필드로 정렬(,집계) 불가능(error)
+GET /snack/_search?sort=name
+# 필드 상관없이 값이 500인 doc 조회
+GET /snack/_search
+{
+    "query": {
+        "query_string": {
+          "query": "오리온"
+        }
+    }
+}
+# price가 5300과 일치하는 doc
+GET /snack/_search
+{
+    "query": {
+        "match": {
+          "price": 5300
+        }
+    }
+}
+# match → text 필드 검색 (분석기 적용)
+# 정확히 일치하는 값이 아니라 자연어 느낌으로 ...
+# 검색어를 토큰화 후 검색
+# "operator":"and" -> 모든 단어가 있어야 매칭
+# "operator":"or"(기본값) -> 하나라도 포함되면 매칭
+
+#'포카칩'으로 검색, '새우깡'으로도 검색, '포카칩 새우깡'으로도 검색
+GET /snack/_search
+{
+    "query": {
+        "match": {
+          "name": "포카칩 새우깡"
+        }
+    }
+}
+
+PUT snack/_doc/7
+{
+  "name": "크라운 새콤달콤 딸기", "maker": "크라운", "price": 500, "weight": 200
+}
+PUT snack/_doc/8
+{
+  "name": "크라운 새콤달콤 딸기 레몬", "maker": "크라운", "price": 500, "weight": 200
+}
+PUT snack/_doc/9
+{
+  "name": "크라운 새콤달콤 포도 레몬", "maker": "크라운", "price": 500, "weight": 200
+}
+GET /snack/_search
+{
+  "query": {
+    "match": {
+      "name": {
+        "query": "크라운 딸기",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+
+POST snack,book/_search
+{
+  "query": {
+    "match": {
+      "name": "새콤달콤"
+    }
+  }
+}
+
+POST snack/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "from": 3,
+  "size": 2
+}
+GET /snack/_search
+{ 
+  "sort": [
+    {
+      "maker": {}
+    },
+    {
+      "weight": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+POST snack/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "_source": [
+    "name", "price"
+  ]
+}
+
+GET /snack/_search
+{
+  "query": {
+    "match": {
+      "name": {
+        "query":"새콤달콤 딸기 새우깡 양파링",
+        "minimum_should_match": "2"
+      }
+    }
+  }
+}
+
+GET /snack/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "200",
+      "fields": ["price", "weight"]
+    }
+  }
+}
+
+PUT test_index
+{
+  "mappings": {
+    "properties": {
+      "txt": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+# POST 인덱스/_doc : ID미지정(자동 생성)해서 새로운 doc 생성
+POST test_index/_doc
+{"txt":"I am a boy"}
+
+GET test_index/_search
+POST test_index/_search
+{
+  "query": {
+    "match": {
+      "txt": "boy am I"
+    }
+  }
+}
+# 완전히 일치하는 경우에만 가능
+POST test_index/_search
+{
+  "query": {
+    "term": {
+      "txt": "I am a boy"
+    }
+  }
+}
+
+# txt1 : 분석기 적용(토큰으로 나눠서 저장)
+# txt2 : 통으로 저장
+PUT keyword_test_index
+{
+  "mappings": {
+    "properties": {
+      "txt1": {
+        "type": "text"
+      },
+      "txt2": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+put keyword_test_index/_doc/1
+{
+  "txt1":"I am a boy",
+  "txt2": "I am a boy"
+}
+
+POST keyword_test_index/_search
+{
+  "query": {
+    "match": {
+      "txt1": "I am"
+    }
+  }
+}
+POST keyword_test_index/_search
+{
+  "query": {
+    "match": {
+      "txt2": "I am a boy"
+    }
+  }
+}
+# term : 정확히 일치하는 값을 찾는다
+# 토큰으로 나눠서 저장된 문자열과 일치X
+# text필드는 term사용X
+POST keyword_test_index/_search
+{
+  "query": {
+    "term": {
+      "txt1": "I am a boy"
+    }
+  }
+}
+
+POST keyword_test_index/_search
+{
+  "query": {
+    "term": {
+      "txt2": "I am a boy"
+    }
+  }
+}
+
+POST /snack/_search
+{
+  "query": {
+    "range": {
+      "price": {
+        "gte": 3300
+      }
+    }
+  }
+}
+POST /snack/_search
+{
+  "query": {
+    "range": {
+      "price": {
+        "gt": 500,
+        "lt" : 3000
+      }
+    }
+  }
+}
+# bool - must  == and(반드시 일치해야 함)
+POST /snack/_search
+{
+  "query": {
+    "bool": {
+      "must":[
+        {"match":{
+          "maker": "오리온"
+        }},
+        {"range": {
+          "price": {
+            "gte": 3000 }
+        }}
+      ]
+    }
+  }
+}
+# must_not : 일치하면 제외
+POST /snack/_search
+{
+  "query": {
+    "bool": {
+      "must_not":[
+        {"match":{
+          "maker": "오리온"
+        }},
+        {"range": {
+          "price": {
+            "gte": 3000 }
+        }}
+      ]
+    }
+  }
+}
+
+POST /snack/_search
+{
+  "query": {
+    "bool": {
+      "must":{"match":{"maker":"농심"}},
+      "must_not":{ "match":{"price":3300}} 
+    }
+  }
+}
+# should  -> OR 조건중 하나라도 만족시
+POST /snack/_search
+{
+  "query": {
+    "bool": {
+      "should":[
+        {"match":{
+          "maker": "농심"
+        }},
+        {"range": {
+          "price": {
+            "gte": 5000 }
+        }}
+      ]
+    }
+  }
+}
+# bool - filter
+POST /snack/_search
+{
+  "query": {
+    "bool": {
+      "filter":[
+        {"match":{
+          "maker": "오리온"
+        }},
+        {"range": {
+          "price": {
+            "lte": 500 }
+        }}
+      ]
+    }
+  }
+}
+
+POST /snack/_search
+{"query": {
+  "query_string": {
+    "query": "새콤달콤 AND 딸기"
+  }
+}}
+POST /snack/_search
+{"query": {
+  "prefix": {
+    "name": "썬"
+  }
+}}
+POST /snack/_search
+{"query": {
+  "exists": {
+    "field":"name"
+  }
+}}
+GET /snack/_search
+{"query": {
+  "wildcard": {
+    "name": {
+      "value": "*깡*"
+    }
+  }
+}}
+GET /snack/_search
+{"query": {
+  "wildcard": {
+    "name": {
+      "value": "*포도"
+    }
+  }
+}}
+# 인덱스/_count
+POST /snack/_count
+
+POST /snack/_count
+{"query": {
+  "match": {
+    "name": "딸기"
+  }
+}}
+
+POST /snack/_validate/query
+{"query": {
+  "matchhhhh":{
+    "price":"500"
+  }
+}}
+
+POST /snack/_validate/query?rewrite=true
+{"query": {
+  "match":{
+    "price":"no"
+  }
+}}
+
+

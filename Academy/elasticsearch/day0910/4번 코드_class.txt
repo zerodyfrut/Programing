@@ -1,0 +1,58 @@
+PUT book
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "author": {
+        "type": "keyword"
+      },
+      "price": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+GET book
+# 인덱스/_doc/_id값
+PUT book/_doc/1
+{"title":"엘라스틱1",
+"author":"김스캇",
+"price":10000
+}
+PUT book/_doc/2
+{"title":"엘라스틱2",
+"author":"김스캇",
+"price":15000
+}
+#전체 조회
+GET book/_search
+# 아이디가 1인 doc조회
+GET book/_doc/1
+# 조건 검색 10000이라는 데이터가 들어있는 doc 조회
+GET book/_search?q=10000
+# 특정 컬럼 조건 doc조회
+GET book/_search?q=author:김스캇
+#doc 수정
+POST book/_update/1
+{
+    "doc":{
+        "price":20000 
+    }
+}
+GET book/_doc/2
+#doc 삭제
+DELETE book/_doc/1
+GET book/_search
+#인덱스 삭제
+DELETE book
+
+PUT coffee/_doc/1
+{
+    "title":"아메리카노",
+    "price": 4500
+}
+GET coffee/_search
+GET coffee
