@@ -1,0 +1,50 @@
+PUT nori_example
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "k_tokenizer": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "mixed"
+        }
+      },
+      "analyzer": {
+        "nori_analyzer": {
+          "type": "custom",
+          "tokenizer": "k_tokenizer"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "comment": {
+        "type": "text",
+        "analyzer": "nori_analyzer"
+      }
+    }
+  }
+}
+
+POST nori_example/_analyze
+{
+  "analyzer":"nori_analyzer",
+  "text":"대한민국서울시청"
+}
+
+# decompound_mode
+
+#"text": "초콜릿케이크"
+
+#모드   결과   특징
+#none   "초콜릿케이크"   분해 안 함
+#discard   "초콜릿", "케이크"   원형 제거, 분해 단어만
+#mixed   "초콜릿케이크", "초콜릿", "케이크"   둘 다 유지 (실무에서 가장 많이 사용)
+
+
+GET nori_example/_analyze
+{
+  "analyzer": "nori_analyzer",
+  "text": "아버지가방에들어가신다"
+}
+

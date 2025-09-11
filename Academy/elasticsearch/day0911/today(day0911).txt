@@ -1,0 +1,15 @@
+Cardinality집계 
+고유값 개수(unique count) - COUNT(DISTINCT)  : 중복 제거 카운팅
+
+Percentiles 집계 
+분위수(percentile) 계산  : %집계
+값들이 어떻게 분포되어 있는지 확인 가능
+예: 상위 25%, 50%, 90% 가격
+
+Percentile Rank 집계
+특정 값이 전체에서 몇 퍼센트 위치에 있는지 계산
+SQL로 치면 PERCENT_RANK() 느낌
+
+범위 집계
+값 범위를 지정해서 집계(from, to 사용)
+SQL의 CASE WHEN price < 1000 THEN ... 느낌

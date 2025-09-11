@@ -1,0 +1,529 @@
+// 인덱스 목록
+GET _cat/indices 
+
+// price의 전체 합계
+Post snack/_search
+{
+  "aggs": { // 집계
+    "priceSum": { //이름 설정
+      "sum": { // 합계
+        "field": "price"
+      }
+    }
+  }
+}
+
+// maker가 오리온인 과자 price 합계
+GET snack/_search
+{
+  "query": {
+    "match": {
+      "maker": "오리온"
+    }
+  },
+  "aggs": {
+    "orionPriceSum": {
+      "sum": {
+        "field": "price"
+      }
+    }
+  }
+}
+
+// maker가 오리온인 과자 price 합계(천원단위) 
+# script 사용
+Post snack/_search
+{
+  "query": {
+    "match": {
+      "maker": "오리온"
+    }
+  },
+  "aggs": {
+    "oridonPriceSum": {
+      "sum": {
+        "script": {
+          "source": "(double)doc.price.value / params.chunWon",
+          //source 작업을 진행하고 그뒤에 sum 진행
+          "params": { // 다른 특정 값이 필요할 경우 사용
+            "chunWon": 1000
+          }
+        }
+      }
+    }
+  }
+}
+
+// maker가 오리온이면서 5000원 이상인 doc
+Post snack/_search
+{
+  "query": {
+    "match": {
+      "maker": "오리온"
+    }
+  },
+  "aggs": {
+    "oridonPriceSum": {
+      "sum": {
+        "script": {
+          "source": "doc['price'].value>=5000? doc['price'].value :0"
+          // 값이 5000원 이상이면 값을 아니면 0원을 적용
+        }
+      }
+    }
+  }
+}
+
+// weight 평균
+POST snack/_search
+{
+  "aggs": {
+    "weightAvg": {
+      "avg": {
+        "field": "weight"
+      }
+    }
+  }
+}
+
+
+// price 최대값, 최소값, 개수, 평균 무게
+POST snack/_search
+{
+  "aggs": {
+    "priceMax": {
+      "max": {
+        "field": "price"
+      }
+    },
+    "priceMin": {
+      "min": {
+        "field": "price"
+      }
+    },
+    "priceCnt": {
+      "value_count": {
+        "field": "price"
+      }
+    },
+    "weightAvg":{
+      "avg": {
+        "field": "weight"
+      }
+    }
+  }
+}
+
+// price 기본통계/ 확장통계
+POST snack/_search
+{
+  "aggs": {
+    "priceStats": {
+      "stats": {
+        "field": "price"
+      }
+    },
+    "priceStats2":{
+      "extended_stats": {
+        "field": "price"
+      }
+    }
+  }
+}
+
+// maker 별로 과자 집계
+Post snack/_search
+{
+  "aggs": {
+    "makers": {
+      "terms": {
+        "field": "maker.keyword"
+      }
+    }
+  }
+}
+
+# 고유값 뽑기, 고유값 개수
+POST snack/_search
+{
+  "aggs": {
+    "makers": {
+      "terms": {
+        "field": "maker.keyword"// maker 별로 개수
+      }
+    },
+    "unique_maker": {
+      "cardinality": {//전체 maker 가 몇 종류인지
+        "field": "maker.keyword"
+      }
+    }
+  }
+}
+
+
+POST snack/_search
+{
+  "aggs": {
+    "persent": {
+      "percentiles": {
+        "field": "price"
+      }
+    },
+    "persent_3":{
+      "percentiles": {
+        "field": "price",
+        "percents": [
+          25,
+          45,
+          90
+        ]
+      }
+    }
+  }
+}
+
+
+POST snack/_search
+{
+  "aggs": {
+    "p_rank": {
+      "percentile_ranks": {
+        "field": "price",
+        "values": [
+          5300,
+          500
+        ]
+      }
+    }
+  }
+}
+
+POST snack/_search
+{
+  "aggs": {
+    "priceRange": {
+      "range": {
+        "field": "price",
+        "ranges": [
+          {
+            "from": 3000,
+            "to": 5000
+          },
+          {
+            "to": 5000 // from, to 중 하나만 써도 됨
+          }
+        ]
+      }
+    }
+  }
+}
+
+PUT products
+{
+  "mappings": {
+    "properties": {
+      "name":{
+        "type": "text"
+      },
+      "brand":{
+        "type": "keyword"
+      },
+      "category":{
+        "type": "keyword"
+      },
+      "price":{
+        "type": "double"
+      },
+      "quantity":{
+        "type": "integer"
+      }
+    }
+  }
+}
+
+POST products/_doc/1
+{
+  "name":"초콜릿",
+  "brand":"로떼",
+  "category":"과자",
+  "price":1500,
+  "quantity":10
+}
+POST products/_doc/2
+{
+  "name":"사탕",
+  "brand":"크라운",
+  "category":"과자",
+  "price":1000,
+  "quantity":20
+}
+POST products/_doc/3
+{
+  "name":"쿠키",
+  "brand":"오리온",
+  "category":"과자",
+  "price":2000,
+  "quantity":5
+}
+POST products/_doc/4
+{
+  "name":"음료수",
+  "brand":"오리온",
+  "category":"음료",
+  "price":3000,
+  "quantity":8
+}
+POST products/_doc/5
+{
+  "name":"주스",
+  "brand":"로떼",
+  "category":"음료",
+  "price":2500,
+  "quantity":12
+}
+
+
+# 0. 브랜드별 제품개수
+GET products/_search
+{
+  "aggs": {
+    "unique_brd": {
+      "terms": {
+        "field": "brand"
+      }
+    }
+  }
+}
+
+# 1. 브랜드 고유 개수
+GET products/_search
+{
+  "aggs": {
+    "unique_brd": {
+      "cardinality": {
+        "field": "brand"
+      }
+    }
+  }
+}
+
+# 2. count, min, max, avg, sum 구하기
+
+GET products/_search
+{
+  "aggs": {
+    "priceCnt": {
+      "value_count": {
+        "field": "price"
+      }
+    },
+    "priceMin": {
+      "min": {
+        "field": "price"
+      }
+    },
+    "priceMax": {
+      "max": {
+        "field": "price"
+      }
+    },
+    "priceAvg": {
+      "avg": {
+        "field": "price"
+      }
+    },
+    "priceSum": {
+      "sum": {
+        "field": "price"
+      }
+    }
+  }
+}
+
+# 3. 25%, 50%, 75%, 90% 가격
+GET products/_search
+{
+  "aggs": {
+    "percent": {
+      "percentiles": {
+        "field": "price",
+        "percents": [
+          25,
+          50,
+          75,
+          90
+        ]
+      }
+    }
+  }
+}
+
+# 4. [1500,2500,3000]가격이 상위 몇 %인지
+GET products/_search
+{
+  "aggs": {
+    "pecentRank": {
+      "percentile_ranks": {
+        "field": "price",
+        "values": [1500,2500,3000]
+      }
+    }
+  }
+}
+
+# 5. 1500원 이하,1500원~ 2500원,2500원 이상의 문서 수
+GET products/_search
+{
+  "aggs": {
+    "rangePrice": {
+      "range": {
+        "field": "price",
+        "ranges": [
+          {
+            "to": 1500
+            //1500 미만으로 되는디 1499로 해야하나
+          },
+          {
+            "from": 1500,
+            "to": 2500
+          },
+          {
+            "from": 2500
+          }
+        ]
+      }
+    }
+  }
+}
+
+# 6. 가격이 2000 이상인 상품만 검색
+
+GET products/_search
+{
+  "query": {
+    "range": {
+      "price": {
+        "gte": 2000
+      }
+    }
+  }
+}
+
+# 7. 브랜드가 "로떼"인 상품만 검색
+get products/_search
+{
+  "query": {
+    "terms": {
+      "brand": [
+        "로떼"
+      ]
+    }
+  }
+}
+
+# 8. category가 "과자"이면서 가격이 1500 이하인 상품 검색.
+GET products/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "category": "과자"
+          }
+        },
+        {
+          "range": {
+            "price": {
+              "lte": 1500
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# 9. 모든 상품의 평균 가격
+GET products/_search
+{
+  "size": 0, // 레코드 출력과정 생략
+  "aggs": {
+    "priceAvg": {
+      "avg": {
+        "field": "price"
+      }
+    }
+  }
+}
+
+# 10 . 모든 상품의 가격 합계를 10% 할인 적용한 후 적용해 검색
+GET products/_search
+{
+  "size": 0,
+  "aggs": {
+    "priceSum": {
+      "sum": {
+        "field": "price",
+        "script": {
+          "source": "doc.price.value * (1-params.sale)",
+          "params": {
+            "sale": 0.1
+          }
+        }
+      }
+    }
+  }
+}
+
+# 11.카테고리별 상품 개수를 집계
+GET products/_search
+{
+  "size": 0,
+  "aggs": {
+    "category_product": {
+      "terms": {
+        "field": "category"
+      }
+    }
+  }
+}
+
+# 그룹화 후 각각의 그룹별로 합계를 구함
+# 12. 가격대별 상품 수를 집계(1000원대, 2000원대, 3000원대)
+GET products/_search
+{
+  "size": 0,
+  "aggs": {
+    "rangePrice": {
+      "range": {
+        "field": "price",
+        "ranges": [
+          {
+            "from":1000,
+            "to": 1999
+          },
+          {
+            "from":2000,
+            "to": 2999
+          },
+          {
+            "from":3000,
+            "to": 3999
+          }
+        ]
+      },
+      "aggs": {
+        "totalQuantity": {
+          "sum": {
+            "field": "quantity"
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+

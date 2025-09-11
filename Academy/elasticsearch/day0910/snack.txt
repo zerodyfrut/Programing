@@ -1,0 +1,521 @@
+snack 인덱스 생성.
+settings로 샤드나 기타설정을
+properties로 필드(==컬럼) 설정
+
+PUT snack
+{
+  "mappings":{
+    "properties":{
+      "name":{
+        "type":"text"  // 형태소 분석으로 나눠서 저장
+      },
+      "maker":{
+        "type":"keyword" // 형태소 분석 없이 통째로 저장
+      },
+      "price":{
+        "type":"integer"
+      },
+      "weight":{
+        "type":"double"
+      }
+    }
+  }
+}
+
+PUT snack/_doc/1  //하나씩 ID를 지정하여 저장
+{
+  "name":"새우깡","maker":"농심","price":3000,"weight":200
+}
+PUT snack/_doc/2
+{
+  "name":"노래방새우깡","maker":"농심","price":5000,"weight":400
+}
+PUT snack/_doc/3
+{
+  "name":"양파링","maker":"농심","price":3300,"weight":220
+}
+PUT snack/_doc/4
+{
+  "name":"맛동산","maker":"해태","price":2300,"weight":150
+}
+PUT snack/_doc/5
+{
+  "name":"포카칩","maker":"오리온","price":5300,"weight":100
+}
+PUT snack/_doc/6
+{
+  "name":"썬칩","maker":"오리온","price":3000,"weight":200
+}
+PUT snack/_doc/7
+{
+  "name":"크라운 새콤달콤 딸기","maker":"오리온","price":500,"weight":200
+}
+PUT snack/_doc/8
+{
+  "name":"크라운 새콤달콤 딸기 레몬","maker":"오리온","price":500,"weight":200
+}
+PUT snack/_doc/9
+{
+  "name":"크라운 새콤달콤 포도 레몬","maker":"오리온","price":500,"weight":200
+}
+
+# 인덱스 내 doc 검색
+GET snack/_search
+
+# 전체 인덱스 검색
+GET _cat/indices
+
+// 어떤 필드든 값이 3000인 것 검색
+GET snack/_search?q=3000
+
+// price(특정 필드)가 3000인 것 검색
+GET snack/_search?q=price:3000
+
+// price(특정 필드)순으로 오름차순 정렬
+GET snack/_search?sort=price
+
+// price(특정 필드)가 3000인 것을 특정필드순으로 오름차순 정렬
+GET snack/_search?q=price:3000&sort=price
+
+// price(특정 필드)순으로 내림차순 정렬
+GET snack/_search?sort=price:desc
+
+// maker 기준으로 오름차순 후 가격기준으로 내림차순 정렬
+GET snack/_search?sort=maker:asc&sort=price:desc
+
+// text 타입 필드로 정렬(,집계) 불가능(error)
+GET snack/_search?sort=name
+
+// 필드 상관없이 값이 3300인 것을 검색(JSON 형태), 해당방식을 많이씀
+GET snack/_search
+{
+  "query": { // 검색 조건
+    "query_string": { // 필드 상관없이
+      "query": 3300 // 값이 3300인
+    }
+  }
+}
+
+// price(특정 필드)가 5000인 것 검색(JSON 형태)
+GET snack/_search
+{
+  "query": { // 검색 조건
+    "match": { // 조건에 해당하는
+      "price": 5000
+    }
+  }
+}
+
+// match -> text 필드 검색(분석기 적용)
+// 정확하게 일치하는 값이 아니라 자연어 느낌으로
+// 기본 구분자 (공백, 줄바꿈, 탭키)를 기준으로 토큰화 후 검색
+// "operator": "and" -> 모든 단어가 있어야 매칭
+// "operator": "or"(기본값) -> 하나라도 포함되면 매칭
+
+# 이름에 포카칩 새우깡으로 검색
+# '포카칩' , '새우깡' , '포카칩 새우깡' 검색
+GET snack/_search
+{
+  "query": {
+    "match": {
+      "name":"포카칩 새우깡"
+    }
+  }
+}
+
+// and를 통해 모든 조건이 만족한 것 검색
+GET snack/_search
+{
+  "query": {
+    "match": {
+      "name": {
+        "query":"크라운 딸기",
+        "operator": "and"
+      }
+      
+    }
+  }
+}
+
+// ,로 구분(띄어쓰기 x)
+// 여러 인덱스에서 검색하기
+POST snack,book/_search
+{
+  "query": {
+    "match": {
+      "name": "새우깡 딸기"
+    }
+  }
+}
+
+// 정렬/집계 출력 (4-5번출력)
+POST snack/_search
+{
+  "query": {
+    "match_all": {} //모두
+  },
+  "from": 3, // 3번부터
+  "size": 2 // 2개
+}
+
+
+GET snack/_search
+{
+  "sort": [
+    "maker.keyword", // maker는 오름차순
+    {
+      "weight": {
+        "order": "desc" // 그뒤에 무게로 내림차순
+      }
+    }
+  ]
+}
+
+POST snack/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "_source": [
+    "name",
+    "price"
+  ]
+}
+
+// 조건중 최소 2개 이상 만족한 doc 출력
+Post snack/_search
+{
+  "query": {
+    "match": {
+     "name": {
+      "query": "새콤달콤 딸기 새우깡 양파링",
+      "minimum_should_match": "2"
+      
+     }
+    }
+  }
+}
+
+// price나 wright 가 500인 doc
+POST snack/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "200",
+      "fields": [
+        "price",
+        "weight"
+      ]
+    }
+  }
+}
+
+
+PUT test_index
+{
+  "mappings": {
+    "properties": {
+      "txt": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+# POST 인덱스/_doc : ID 미지정시 ID 자동생성 
+# 새로운 doc 생성
+POST test_index/_doc
+{
+  "txt":"I am boy"
+}
+
+GET test_index/_search
+
+# txt1 : 분석기 적용 (쪼개져서 토큰 형태로 저장)
+# txt2 : 통으로 저장
+PUT keyword_test_index
+{
+  "mappings": {
+    "properties": {
+      "txt1": {
+        "type": "text"
+      },
+      "txt2": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+
+puT keyword_test_index/_doc/1
+{
+  "txt1": "I am a boy",
+  "txt2": "I am a boy"
+}
+
+POST keyword_test_index/_search
+{
+  "query": {
+    "match": {
+      "txt1": "I am"
+    }
+  }
+}
+
+POST keyword_test_index/_search
+{
+  "query": {
+    "match": {
+      "txt2": "I am"
+    }
+  }
+}
+
+# term : 정확히 일치하는 값을 찾는다.
+# 토큰으로 나눠서 저장된 문자열과 일치여부 확인
+# text 필드는 term 사용x
+POST keyword_test_index/_search
+{
+  "query": {
+    "term": {
+      "txt1":"I am a boy"
+    }
+  }
+}
+
+# keyword 필드는 term 사용(match도 가능)
+POST keyword_test_index/_search
+{
+  "query": {
+    "term": {
+      "txt2":"I am a boy"
+    }
+  }
+}
+
+# 범위
+# gte/lte(이상/이하), gt/lt(초과/미만)
+post snack/_search
+{
+  "query": {
+    "range": {
+      "price": {
+        "gte": 3500
+      }
+    }
+  }
+}
+
+post snack/_search
+{
+  "query": {
+    "range": {
+      "price": {
+        "gt": 500,
+        "lt": 3500
+      }
+    }
+  }
+}
+
+# bool - must == and(반드시 일치해야 함)
+post snack/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "maker": "오리온"
+          }
+        },
+        {
+          "range": {
+            "price": {
+              "gte": 3000
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# bool - must_not : 일치하면 제외
+# 오리온 회사 제외, 가격 3000 이상 제외
+post snack/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "match": {
+            "maker": "오리온"
+          }
+        },
+        {
+          "range": {
+            "price": {
+              "gte": 3000
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# 회사는 농심이고, 3300원이 아닌 doc
+post snack/_search
+{
+  "query": {
+    "bool": {
+      "must": {
+        "match": {
+          "maker": "농심"
+        }
+      },
+      "must_not": {
+        "match":{
+          "price":3300
+        }
+      }
+    }
+  }
+}
+
+# bool - should == or
+post snack/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "maker": "농심"
+          }
+        },
+        {
+          "range": {
+            "price": {
+              "gte": 5000
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# bool - filter : 조건에 해당하는 doc 
+post snack/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "match": {
+            "maker": "오리온"
+          }
+        },
+        {
+          "range": {
+            "price": {
+              "lte": 500
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# query_string : 조건을 직접 작성
+POST snack/_search
+{
+  "query": {
+      "query_string": {
+        "query": "새콤달콤 and 딸기"
+      }
+  }
+}
+
+# 해당 단어로 시작하는 토큰이 있는 doc
+POST snack/_search
+{
+  "query": {
+    "prefix": {
+      "name": {
+        "value": "새콤"
+      }
+    }
+  }
+}
+
+# 해당이름의 필드가 있는 doc
+POST snack/_search
+{
+  "query": {
+    "exists": {
+      "field":"name"
+    }
+  }
+}
+
+// wildcard
+// * : 여러 글자
+// ? : 한 글자
+// name에 달콤이 포함된 것
+POST snack/_search
+{
+  "query": {
+    "wildcard": {
+      "name": {
+        "value": "*달콤*"
+      }
+    }
+  }
+}
+
+// name 이 xx칩인 거
+POST snack/_search
+{
+  "query": {
+    "wildcard": {
+      "name": {
+        "value": "??칩"
+      }
+    }
+  }
+}
+
+// 인덱스내 doc의 총 개수
+POST snack/_count
+
+// 이름에 딸기가 들어간 doc 개수
+POST snack/_count
+{
+  "query": {
+    "match": {
+      "name": "딸기"
+    }
+  }
+}
+
+POST snack/_validate/query
+{
+  "query": {
+    "matchhhhhh":{
+      "price":"500"
+    }
+  }
+}
+
+POST snack/_validate/query?rewrite=true
+{
+  "query": {
+    "match":{
+      "price":"no"
+    }
+  }
+}
