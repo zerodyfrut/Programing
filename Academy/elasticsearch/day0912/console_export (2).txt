@@ -1,0 +1,79 @@
+PUT nori_example
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "nori_tokenizer_custom": {
+          "type": "nori_tokenizer",
+          "decompound_mode":"mixed"
+        }
+      },
+      "analyzer": {
+        "nori_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer_custom",
+          "filter":["lowercase","stop"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "comment": {
+        "type": "text",
+        "analyzer": "nori_analyzer"
+      }
+    }
+  }
+}
+
+GET nori_example/_analyze
+{
+  "analyzer":"nori_analyzer",
+  "text":"대한민국서울시청에서 열린 문화 행사"
+}
+
+# decompound_mode
+
+#"text": "초콜릿케이크"
+
+#모드   결과   특징
+#none   "초콜릿케이크"   분해 안 함
+#discard   "초콜릿", "케이크"   원형 제거, 분해 단어만
+#mixed   "초콜릿케이크", "초콜릿", "케이크"   둘 다 유지 (실무에서 가장 많이 사용)
+
+
+PUT nori_example2
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "k_POSFilter": {
+          "type": "nori_part_of_speech",
+          "stoptags": [
+            "NNG",// 일반명사
+            "VV"  // 동사
+          ]
+        }
+      },
+    "analyzer":{
+      "k_analyzer":{
+        "type":"custom",
+        "tokenizer":"nori_tokenizer",
+        "filter":["k_POSFilter"]
+      }
+    }
+    }
+  }}
+
+GET nori_example2/_analyze
+{
+  "analyzer":"k_analyzer",
+  "text": "서울시에서 교통사고 예방 캠페인을 시작했다."
+}
+
+GET nori_example2/_analyze
+{
+  "analyzer":"k_analyzer",
+  "text": "국가안전보장회의의 조직·직무범위 기타 필요한 사항은 법률로 정한다. 헌법에 의하여 체결·공포된 조약과 일반적으로 승인된 국제법규는 국내법과 같은 효력을 가진다.모든 국민은 보건에 관하여 국가의 보호를 받는다. 언론·출판에 대한 허가나 검열과 집회·결사에 대한 허가는 인정되지 아니한다. 모든 국민은 고문을 받지 아니하며, 형사상 자기에게 불리한 진술을 강요당하지 아니한다."
+}

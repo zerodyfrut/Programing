@@ -25,6 +25,11 @@ uvicorn 파일명:app --reload
 Ctrl + c
 
 
+[엘라스틱 서치관련]
+pip install "elasticsearch[async]"
+
+
+
 [JWT 관련]
 pip install fastapi uvicorn "sqlalchemy>=1.4" pymysql jinja2 python-multipart python-jose[cryptography] passlib[bcrypt]
 
