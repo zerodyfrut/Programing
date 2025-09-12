@@ -1,0 +1,111 @@
+from elasticsearch import Elasticsearch, helpers # 대용량을 한번에 다룰때 helpers
+
+# 1) Elasticsearch 연결
+with Elasticsearch("http://localhost:9200") as es: # 필요시 username/password 추가
+
+    # 2) 인덱스 생성 (존재하지 않을 경우)
+    index_body = {
+        "settings": {
+            "analysis": {
+                "tokenizer": {
+                    "nori_tokenizer_custom": {
+                        "type": "nori_tokenizer",
+                        "decompound_mode": "mixed"
+                    }
+                },
+                "analyzer": {
+                    "nori_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "nori_tokenizer_custom",
+                        "filter": ["lowercase"]
+                    }
+                }
+            }
+        },
+        "mappings": {
+            "properties": {
+                "section": {"type": "keyword"},
+                "comment": {"type": "text", "analyzer": "nori_analyzer"},
+                "tags": {"type": "keyword"}
+            }
+        }
+    }
+
+    if not es.indices.exists(index="news_example"):
+        es.indices.create(index="news_example", body=index_body)
+
+    # 3) 뉴스 데이터 50개
+    news_docs = [
+        # 정치
+        {"section": "정치", "comment": "대통령이 국회 연설에서 개혁 정책을 강조했다.", "tags": ["정책", "국회"]},
+        {"section": "정치", "comment": "여야 대표가 경제법안 처리를 논의했다.", "tags": ["경제", "법안"]},
+        {"section": "정치", "comment": "지방 선거 후보 등록이 마감되었다.", "tags": ["선거", "지방"]},
+        {"section": "정치", "comment": "정부가 외교 협력 강화를 위해 국제 회담에 참석했다.", "tags": ["외교", "국제"]},
+        {"section": "정치", "comment": "국회의원들이 예산안을 심사하고 있다.", "tags": ["예산", "심사"]},
+        {"section": "정치", "comment": "청와대는 새로운 정책 브리핑을 발표했다.", "tags": ["청와대", "정책"]},
+        {"section": "정치", "comment": "국방 관련 법률 개정안이 논의 중이다.", "tags": ["국방", "법률"]},
+        {"section": "정치", "comment": "정당 내부 경선 일정이 공개되었다.", "tags": ["정당", "경선"]},
+        {"section": "정치", "comment": "국제 회담에서 기후 정책 협력이 강조되었다.", "tags": ["국제", "기후"]},
+        {"section": "정치", "comment": "선거관리위원회가 투표 안내문을 발송했다.", "tags": ["선거", "관리"]},
+
+        # 경제
+        {"section": "경제", "comment": "한국은행이 기준 금리를 동결했다.", "tags": ["금리", "한국은행"]},
+        {"section": "경제", "comment": "주식시장이 외국인 투자자 매수세로 상승했다.", "tags": ["주식", "투자"]},
+        {"section": "경제", "comment": "국내 자동차 산업이 전기차 생산 확대를 발표했다.", "tags": ["자동차", "전기차"]},
+        {"section": "경제", "comment": "국제 유가가 상승하며 국내 휘발유 가격에도 영향이 있었다.", "tags": ["유가", "가격"]},
+        {"section": "경제", "comment": "중소기업 지원 정책이 발표되어 금융 혜택이 늘었다.", "tags": ["중소기업", "지원"]},
+        {"section": "경제", "comment": "수출액이 전년 대비 증가하며 경제 회복세가 나타났다.", "tags": ["수출", "경제회복"]},
+        {"section": "경제", "comment": "부동산 가격 상승으로 주택 정책에 관심이 집중된다.", "tags": ["부동산", "주택"]},
+        {"section": "경제", "comment": "IT 기업들이 신규 스타트업 투자에 나섰다.", "tags": ["IT", "스타트업"]},
+        {"section": "경제", "comment": "소비자 물가 상승률이 통계청 발표로 공개되었다.", "tags": ["물가", "통계청"]},
+        {"section": "경제", "comment": "금융권이 대출 조건을 완화하기로 결정했다.", "tags": ["금융", "대출"]},
+
+        # 스포츠
+        {"section": "스포츠", "comment": "프로야구 시즌 개막전에서 두산이 승리했다.", "tags": ["야구", "두산"]},
+        {"section": "스포츠", "comment": "올림픽 메달리스트가 국내 팬들과 만났다.", "tags": ["올림픽", "메달"]},
+        {"section": "스포츠", "comment": "축구 국가대표팀이 월드컵 예선에서 승리했다.", "tags": ["축구", "월드컵"]},
+        {"section": "스포츠", "comment": "마라톤 대회 참가자가 기록을 갱신했다.", "tags": ["마라톤", "기록"]},
+        {"section": "스포츠", "comment": "테니스 선수들이 그랜드슬램 토너먼트에 출전했다.", "tags": ["테니스", "토너먼트"]},
+        {"section": "스포츠", "comment": "골프 대회에서 프로 선수가 우승했다.", "tags": ["골프", "우승"]},
+        {"section": "스포츠", "comment": "배구 대표팀이 아시아 챔피언십에서 승리했다.", "tags": ["배구", "챔피언십"]},
+        {"section": "스포츠", "comment": "야구 팬들이 경기장을 가득 메웠다.", "tags": ["야구", "팬"]},
+        {"section": "스포츠", "comment": "축구 클럽이 새로운 감독을 선임했다.", "tags": ["축구", "클럽"]},
+        {"section": "스포츠", "comment": "체조 선수들이 국제 대회에서 메달을 획득했다.", "tags": ["체조", "메달"]},
+
+        # 사회
+        {"section": "사회", "comment": "서울시에서 교통사고 예방 캠페인을 시작했다.", "tags": ["교통", "캠페인"]},
+        {"section": "사회", "comment": "청소년 범죄 예방을 위한 교육 프로그램이 진행된다.", "tags": ["청소년", "범죄"]},
+        {"section": "사회", "comment": "대형 화재 발생으로 소방당국이 출동했다.", "tags": ["화재", "소방"]},
+        {"section": "사회", "comment": "환경 보호 단체가 플라스틱 줄이기 캠페인을 진행한다.", "tags": ["환경", "캠페인"]},
+        {"section": "사회", "comment": "시민들이 공원 정화 활동에 참여했다.", "tags": ["시민", "공원"]},
+        {"section": "사회", "comment": "대중교통 이용률이 통계청 발표로 공개되었다.", "tags": ["대중교통", "통계"]},
+        {"section": "사회", "comment": "재난 안전 교육이 전국적으로 실시된다.", "tags": ["재난", "교육"]},
+        {"section": "사회", "comment": "지역 주민들이 문화 축제 준비에 나섰다.", "tags": ["지역", "문화"]},
+        {"section": "사회", "comment": "노인 복지 센터가 신규 프로그램을 운영한다.", "tags": ["노인", "복지"]},
+        {"section": "사회", "comment": "시청 앞 광장에서 거리 공연이 열렸다.", "tags": ["공연", "광장"]},
+
+        # 문화
+        {"section": "문화", "comment": "서울에서 국제 영화제가 개최되었다.", "tags": ["영화제", "국제"]},
+        {"section": "문화", "comment": "미술관에서 현대 미술 전시가 열렸다.", "tags": ["미술", "전시"]},
+        {"section": "문화", "comment": "전통 공연이 문화센터에서 관람객을 맞이했다.", "tags": ["공연", "전통"]},
+        {"section": "문화", "comment": "국악 축제가 전국적으로 열렸다.", "tags": ["국악", "축제"]},
+        {"section": "문화", "comment": "도서관에서 독서 프로그램이 운영된다.", "tags": ["독서", "도서관"]},
+        {"section": "문화", "comment": "뮤지컬 공연이 인기리에 진행 중이다.", "tags": ["뮤지컬", "공연"]},
+        {"section": "문화", "comment": "사진전에서 다양한 작품이 전시되었다.", "tags": ["사진전", "전시"]},
+        {"section": "문화", "comment": "책 박람회가 시민들의 관심 속에서 열렸다.", "tags": ["책", "박람회"]},
+        {"section": "문화", "comment": "음악 축제가 도심 광장에서 진행되었다.", "tags": ["음악", "축제"]},
+        {"section": "문화", "comment": "연극 공연이 학교 체험 프로그램으로 선보였다.", "tags": ["연극", "체험"]}
+    ]
+
+    # 4) bulk로 한 번에 삽입
+    actions = [
+        {"_index": "news_example", "_id": i+1, "_source": doc}
+        for i, doc in enumerate(news_docs)
+    ]
+
+    helpers.bulk(es, actions)
+
+    print("50개 뉴스 데이터 bulk 삽입 완료!")
+
+
+# uvicorn test:app --reload
