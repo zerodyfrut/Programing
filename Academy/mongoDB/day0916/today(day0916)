@@ -1,0 +1,37 @@
+MongoDB(Nosql)
+
+mongod : MongoDB 서버 프로세스
+
+MongoDB
+문서 지향(Document-oriented) 데이터베이스
+
+Document: JSON과 비슷한 구조의 데이터 단위. MongoDB에서 저장되는 최소 단위.
+Collection: 여러 Document의 모음. 스키마가 고정돼 있지 않음.
+Database: 여러 Collection을 담는 컨테이너.
+Field: Document 내부의 키(key). 값(value)은 문자열, 숫자, 배열, 객체 등 자유롭게 가능.
+_id: Document의 기본 Primary Key. 자동으로 ObjectId가 생성됨.
+Array: Document 안에서 배열을 값으로 가질 수 있음.
+
+
+조건에 사용되는 연산자
+$eq   값이 같음   {"age": {"$eq": 30}}
+$ne   값이 같지 않음   {"status": {"$ne": "A"}}
+$gt   보다 큼   {"age": {"$gt": 25}}
+$gte   크거나 같음   {"age": {"$gte": 18}}
+$lt   보다 작음   {"age": {"$lt": 40}}
+$lte   작거나 같음   {"age": {"$lte": 60}}
+$in   배열 안에 포함   {"status": {"$in": ["A", "B"]}}
+$nin   배열 안에 포함되지 않음   {"status": {"$nin": ["X", "Y"]}}
+
+$and   여러 조건을 모두 만족   {"$and": [{"age":{"$gte":20}}, {"age":{"$lte":30}}]}
+$or   조건 중 하나라도 만족   {"$or": [{"age":25}, {"name":"Nia"}]}
+$not   조건의 부정   {"age": {"$not": {"$gt":30}}}
+$nor   $or의 반대 (모두 거짓)   {"$nor": [{"age":25}, {"name":"Nia"}]}
+
+$exists   필드 존재 여부   {"phone": {"$exists": true}}
+$type   필드의 BSON 타입 검사   {"age": {"$type": "int"}}
+
+$regex   정규표현식 검색   {"name": {"$regex": "^N", "$options": "i"}}
+$expr   문서 안 필드끼리 비교   {"$expr": {"$gt": ["$score", "$average"]}}
+$text   텍스트 인덱스 검색   {"$text": {"$search": "coffee"}}
+$where   JavaScript 표현식 평가 (성능 주의)   {"$where": "this.age + this.score > 50"}
