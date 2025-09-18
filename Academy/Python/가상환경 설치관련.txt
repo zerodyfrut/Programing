@@ -7,7 +7,6 @@ deactivate
 
 	
 [Flask 개발 가상환경 생성/활성화/설치] : Flask 관련 웹 개발 가상환경
-
 python -m venv flask_web
 flask_web\Scripts\activate
 pip install flask
@@ -103,3 +102,9 @@ pip install pymysql
 [SQLAlchemy] : Python에서 DB를 객체지향적으로 다룰 수 있게 해주는 ORM/DB 툴
 pip install sqlalchemy
 
+
+[mongodb] : mongodb 관련설치
+pip install pymongo
+
+[scikit-lean] : 고전적인 기계학습 지원
+pip install scikit-learn 
