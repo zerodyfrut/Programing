@@ -106,5 +106,14 @@ pip install sqlalchemy
 [mongodb] : mongodb 관련설치
 pip install pymongo
 
+
 [scikit-lean] : 고전적인 기계학습 지원
 pip install scikit-learn 
+
+
+[openai] : open ai 라이브러리 설치
+pip install openai
+
+
+[chromadb] : Chroma, 벡터 DB중 하나로 RAG를 사용하는 open ai 작업에 사용되는 db
+pip install chromadb
