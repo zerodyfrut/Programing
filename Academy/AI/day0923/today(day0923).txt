@@ -15,3 +15,5 @@ ex)
 계단 함수 : 0보다 크면 1, 아니면 -1
 시그모이드 함수 : 값이 0보다 작다면 0에 가까운 숫자로 바꿔줌
 
+py -3.11 -m venv torch_ex
+torch_ex\Scripts\activate

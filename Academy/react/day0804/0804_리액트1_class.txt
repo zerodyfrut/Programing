@@ -21,6 +21,7 @@ Vite				빠르고 가벼운 번들러, 최신 트렌드. 점점 대세
 
 
 [create-react-app로 프로젝트 생성]
+(npx create-react-app front-react)
 1. node.js 설치
 2. VScode에서 ctrl+ j -> cmd prompt 선택
 npx create-react-app my-app

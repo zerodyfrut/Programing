@@ -1,12 +1,12 @@
 import './App.css'
 import { useState } from 'react'
-import Button from './component/Button'
-import Button2 from './component/Button2'
-import FormExample from './component/FormExample'
-import Count from './component/Count'
-import Light from './component/Light'
-import Parent from './component/Parent'
-import ChangeColor from './component/ChangeColor'
+import Button from './components/Button'
+import Button2 from './components/Button2'
+import FormExample from './components/FormExample'
+import Count from './components/Count'
+import Light from './components/Light'
+import Parent from './components/Parent'
+import ChangeColor from './components/ChangeColor'
 
 function App() {
 
